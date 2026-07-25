@@ -5,7 +5,7 @@ const connectDB = require('./config/db');
 
 const app = express();
 
-// اتصال به دیتابیس MongoDB
+// اتصال به دیتابیس
 connectDB();
 
 // Middleware
@@ -16,8 +16,8 @@ app.use(express.json());
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/categories', require('./routes/categoryRoutes'));
 app.use('/api/menu', require('./routes/menuRoutes'));
+app.use('/api/orders', require('./routes/orderRoutes')); // <-- اضافه شد
 
-// Test Route
 app.get('/', (req, res) => {
   res.send('Server FoodOps running smoothly!');
 });
