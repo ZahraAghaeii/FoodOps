@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FoodOps - سفارش آنلاین غذا</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, sans-serif; }
+    body { background-color: #f8f9fa; color: #333; }
+    
+    /* هدر */
+    header { background-color: #2c3e50; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { font-size: 20px; }
+    .user-info { font-size: 14px; }
+    .btn-logout { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 10px; }
+
+    /* کانتینر اصلی */
+    .container { display: flex; gap: 20px; padding: 20px; max-width: 1200px; margin: 0 auto; }
+    
+    /* بخش منوی غذاها */
+    .menu-section { flex: 3; }
+    .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-top: 15px; }
+    .food-card { background: white; border-radius: 8px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; flex-direction: column; justify-content: space-between; }
+    .food-card h3 { font-size: 16px; margin-bottom: 8px; color: #2c3e50; }
+    .food-card p { font-size: 12px; color: #666; margin-bottom: 12px; flex-grow: 1; }
+    .food-price { font-weight: bold; color: #27ae60; font-size: 15px; margin-bottom: 10px; }
+    .btn-add { background: #27ae60; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; }
+    .btn-add:hover { background: #219150; }
+
+    /* بخش سبد خرید */
+    .cart-section { flex: 1; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); height: fit-content; }
+    .cart-section h2 { font-size: 18px; margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 8px; }
+    .cart-items { list-style: none; margin-bottom: 15px; max-height: 300px; overflow-y: auto; }
+    .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+    .cart-item-title { flex: 1; }
+    .cart-item-qty { font-weight: bold; margin: 0 8px; }
+    .btn-remove { background: #ff4d4d; color: white; border: none; width: 22px; height: 22px; border-radius: 50%; cursor: pointer; font-size: 12px; }
+    .cart-total { font-weight: bold; font-size: 16px; margin-top: 15px; display: flex; justify-content: space-between; }
+    .btn-checkout { background: #2980b9; color: white; border: none; width: 100%; padding: 12px; border-radius: 6px; font-weight: bold; margin-top: 15px; cursor: pointer; font-size: 15px; }
+    .btn-checkout:hover { background: #1f6391; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>سیستم سفارش آنلاین FoodOps</h1>
+    <div class="user-info">
+      <span id="userName">کاربر مهمان</span>
+      <button class="btn-logout" onclick="logout()">خروج</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- منوی غذاها -->
+    <div class="menu-section">
+      <h2>منوی غذا و نوشیدنی</h2>
+      <div class="menu-grid" id="menuGrid">
+        <p>در حال دریافت منو...</p>
+      </div>
+    </div>
+
+    <!-- سبد خرید -->
+    <div class="cart-section">
+      <h2>سبد خرید شما</h2>
+      <ul class="cart-items" id="cartItems">
+        <p style="font-size: 13px; color: #888;">سبد خرید شما خالی است.</p>
+      </ul>
+      <div class="cart-total">
+        <span>جمع کل:</span>
+        <span id="totalPrice">۰ تومان</span>
+      </div>
+      <button class="btn-checkout" onclick="submitOrder()">ثبت و نهایی‌سازی سفارش</button>
+    </div>
+  </div>
+
+  <script>
+    const API_MENU = 'http://localhost:5000/api/menu';
+    const API_ORDERS = 'http://localhost:5000/api/orders';
+    
+    let cart = [];
+
+    // چک کردن لاگین بودن کاربر موقع بارگذاری صفحه
+    window.onload = () => {
+      const token = localStorage.getItem('token');
+      const user = JSON.parse(localStorage.getItem('user'));
+
+      if (!token || !user) {
+        window.location.href = 'login.html'; // اگه لاگین نبود بره صفحه لاگین
+        return;
+      }
+
+      document.getElementById('userName').innerText = `خوش آمدید، ${user.name}`;
+      fetchMenu();
+    };
+
+    // خروج از حساب
+    function logout() {
+      localStorage.clear();
+      window.location.href = 'login.html';
+    }
+
+    // دریافت منوی غذاها از بک‌اند
+    async function fetchMenu() {
+      try {
+        const res = await fetch(API_MENU);
+        const menuItems = await res.json();
+        
+        const menuGrid = document.getElementById('menuGrid');
+        menuGrid.innerHTML = '';
+
+        if (menuItems.length === 0) {
+          menuGrid.innerHTML = '<p>هیچ غذایی در منو ثبت نشده است.</p>';
+          return;
+        }
+
+        menuItems.forEach(item => {
+          if (!item.isAvailable) return;
+
+          const card = document.createElement('div');
+          card.className = 'food-card';
+          card.innerHTML = `
+            <div>
+              <h3>${item.name}</h3>
+              <p>${item.description || 'بدون توضیح'}</p>
+            </div>
+            <div>
+              <div class="food-price">${item.price.toLocaleString('fa-IR')} تومان</div>
+              <button class="btn-add" onclick="addToCart('${item._id}', '${item.name}', ${item.price})">افزودن به سبد</button>
+            </div>
+          `;
+          menuGrid.appendChild(card);
+        });
+      } catch (err) {
+        document.getElementById('menuGrid').innerHTML = '<p style="color:red;">خطا در دریافت منو از سرور!</p>';
+      }
+    }
+
+    // افزودن ایتم به سبد خرید
+    function addToCart(id, name, price) {
+      const existing = cart.find(i => i.menuItem === id);
+      if (existing) {
+        existing.quantity += 1;
+      } else {
+        cart.push({ menuItem: id, name, priceAtOrder: price, quantity: 1 });
+      }
+      renderCart();
+    }
+
+    // حذف یا کاهش تعداد ایتم از سبد خرید
+    function removeFromCart(id) {
+      const index = cart.findIndex(i => i.menuItem === id);
+      if (index !== -1) {
+        if (cart[index].quantity > 1) {
+          cart[index].quantity -= 1;
+        } else {
+          cart.splice(index, 1);
+        }
+      }
+      renderCart();
+    }
+
+    // رندر مجدد فرانت سبد خرید
+    function renderCart() {
+      const cartContainer = document.getElementById('cartItems');
+      cartContainer.innerHTML = '';
+
+      if (cart.length === 0) {
+        cartContainer.innerHTML = '<p style="font-size: 13px; color: #888;">سبد خرید شما خالی است.</p>';
+        document.getElementById('totalPrice').innerText = '۰ تومان';
+        return;
+      }
+
+      let total = 0;
+      cart.forEach(item => {
+        total += item.priceAtOrder * item.quantity;
+        const li = document.createElement('li');
+        li.className = 'cart-item';
+        li.innerHTML = `
+          <span class="cart-item-title">${item.name}</span>
+          <span class="cart-item-qty">x${item.quantity}</span>
+          <span>${(item.priceAtOrder * item.quantity).toLocaleString('fa-IR')}</span>
+          <button class="btn-remove" onclick="removeFromCart('${item.menuItem}')">✕</button>
+        `;
+        cartContainer.appendChild(li);
+      });
+
+      document.getElementById('totalPrice').innerText = `${total.toLocaleString('fa-IR')} تومان`;
+    }
+
+    // ثبت نهایی سفارش در بک‌اند
+    async function submitOrder() {
+      if (cart.length === 0) {
+        alert('سبد خرید شما خالی است!');
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+      const itemsPayload = cart.map(i => ({
+        menuItem: i.menuItem,
+        quantity: i.quantity,
+        priceAtOrder: i.priceAtOrder
+      }));
+
+      try {
+        const res = await fetch(API_ORDERS, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ items: itemsPayload })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          alert('سفارش شما با موفقیت ثبت شد و به آشپزخانه ارسال شد! 🎉');
+          cart = [];
+          renderCart();
+        } else {
+          alert(data.message || 'خطا در ثبت سفارش');
+        }
+      } catch (err) {
+        alert('خطا در ارتباط با سرور');
+      }
+    }
+  </script>
+</body>
+</html>
