@@ -25,12 +25,11 @@ const userSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// هش کردن رمز عبور قبل از ذخیره در دیتابیس
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
+// هش کردن رمز عبور قبل از ذخیره در دیتابیس (بدون نیاز به next)
+userSchema.pre('save', async function() {
+  if (!this.isModified('password')) return;
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
-  next();
 });
 
 // متد مقایسه رمز عبور واردشده با رمز هش‌شده

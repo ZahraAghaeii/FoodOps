@@ -3,9 +3,11 @@ const jwt = require('jsonwebtoken');
 
 // تابع کمکی برای تولید توکن JWT
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: '30d'
-  });
+  return jwt.sign(
+    { id }, 
+    process.env.JWT_SECRET || 'fallback_secret_key_12345', 
+    { expiresIn: '30d' }
+  );
 };
 
 // @desc    ثبت‌نام کاربر جدید
@@ -20,7 +22,7 @@ exports.register = async (req, res) => {
       return res.status(400).json({ message: 'کاربری با این ایمیل قبلاً ثبت‌نام کرده است' });
     }
 
-    // ساخت کاربر (پسورد خودکار در مدل هش می‌شود)
+    // ساخت کاربر (پسورد خودکار در Hook پیش از ذخیره در مدل هش می‌شود)
     const user = await User.create({
       name,
       email,
@@ -29,14 +31,21 @@ exports.register = async (req, res) => {
     });
 
     res.status(201).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      token: generateToken(user._id)
+      token: generateToken(user._id),
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
     });
+
   } catch (error) {
-    res.status(500).json({ message: 'خطای سرور در ثبت‌نام', error: error.message });
+    console.error('Register Error Details:', error);
+    res.status(500).json({ 
+      message: error.message || 'خطای سرور در ثبت‌نام', 
+      error: error.message 
+    });
   }
 };
 
@@ -52,17 +61,23 @@ exports.login = async (req, res) => {
     // بررسی وجود کاربر و درستی پسورد
     if (user && (await user.matchPassword(password))) {
       res.json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        token: generateToken(user._id)
+        token: generateToken(user._id),
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role
+        }
       });
     } else {
       res.status(401).json({ message: 'ایمیل یا رمز عبور اشتباه است' });
     }
   } catch (error) {
-    res.status(500).json({ message: 'خطای سرور در ورود', error: error.message });
+    console.error('Login Error Details:', error);
+    res.status(500).json({ 
+      message: error.message || 'خطای سرور در ورود', 
+      error: error.message 
+    });
   }
 };
 
@@ -73,7 +88,11 @@ exports.getMe = async (req, res) => {
     const user = await User.findById(req.user._id).select('-password');
     res.json(user);
   } catch (error) {
-    res.status(500).json({ message: 'خطای سرور در دریافت اطلاعات', error: error.message });
+    console.error('GetMe Error Details:', error);
+    res.status(500).json({ 
+      message: error.message || 'خطای سرور در دریافت اطلاعات', 
+      error: error.message 
+    });
   }
 };
 
