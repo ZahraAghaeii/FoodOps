@@ -57,7 +57,7 @@ async function fetchCategories() {
   }
 }
 
-// دریافت منوی غذاها از بک‌اند
+// دریافت منوی غذاها از بک‌اند و نمایش آن‌ها به همراه نام دسته‌بندی
 async function fetchMenu() {
   try {
     const res = await fetch(API_MENU);
@@ -76,10 +76,18 @@ async function fetchMenu() {
     menuItems.forEach(item => {
       if (!item.isAvailable) return;
 
+      // بررسی وجود دسته‌بندی و استخراج نام آن (در صورتی که بک‌اند populate کرده باشد)
+      const categoryName = item.category && item.category.name 
+        ? item.category.name 
+        : 'بدون دسته‌بندی';
+
       const card = document.createElement('div');
       card.className = 'food-card';
       card.innerHTML = `
         <div>
+          <span style="font-size: 11px; background: #e0e0e0; color: #555; padding: 2px 8px; border-radius: 10px; display: inline-block; margin-bottom: 6px;">
+            ${categoryName}
+          </span>
           <h3>${item.name}</h3>
           <p>${item.description || 'بدون توضیح'}</p>
         </div>
