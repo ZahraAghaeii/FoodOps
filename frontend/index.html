@@ -22,7 +22,7 @@
     .admin-section { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 10px; }
     .admin-section h2 { font-size: 16px; margin-bottom: 12px; color: #2c3e50; }
     .admin-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) auto; gap: 10px; align-items: center; }
-    .admin-form input { padding: 8px 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 13px; }
+    .admin-form input, .admin-form select { padding: 8px 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 13px; outline: none; background-color: white; }
     .btn-submit-food { background: #8e44ad; color: white; border: none; padding: 9px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
     .btn-submit-food:hover { background: #732d91; }
 
@@ -67,7 +67,9 @@
         <input type="text" id="menu-name" placeholder="نام غذا (مثلاً پیتزا پپرونی)" required />
         <input type="text" id="menu-desc" placeholder="توضیحات غذا" required />
         <input type="number" id="menu-price" placeholder="قیمت (تومان)" required />
-        <input type="text" id="menu-category" placeholder="آیدی دسته‌بندی (Category ID)" required />
+        <select id="menu-category" required>
+          <option value="">در حال بارگذاری دسته‌بندی‌ها...</option>
+        </select>
         <button type="submit" class="btn-submit-food">ثبت غذا</button>
       </form>
     </div>

@@ -1,9 +1,10 @@
 const API_MENU = 'http://localhost:5000/api/menu';
 const API_ORDERS = 'http://localhost:5000/api/orders';
+const API_CATEGORIES = 'http://localhost:5000/api/categories';
 
 let cart = [];
 
-// چک کردن وضعیت لاگین و فراخوانی منو هنگام بارگذاری صفحه
+// چک کردن وضعیت لاگین و فراخوانی منو و دسته‌بندی‌ها هنگام بارگذاری صفحه
 window.onload = () => {
   const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user'));
@@ -19,12 +20,41 @@ window.onload = () => {
   }
 
   fetchMenu();
+  fetchCategories();
 };
 
 // خروج از حساب کاربری
 function logout() {
   localStorage.clear();
   window.location.href = 'login.html';
+}
+
+// دریافت دسته‌بندی‌ها از بک‌اند و پر کردن Dropdown
+async function fetchCategories() {
+  const categorySelect = document.getElementById('menu-category');
+  if (!categorySelect) return;
+
+  try {
+    const res = await fetch(API_CATEGORIES);
+    const categories = await res.json();
+
+    categorySelect.innerHTML = '<option value="">انتخاب دسته‌بندی...</option>';
+
+    if (!Array.isArray(categories) || categories.length === 0) {
+      categorySelect.innerHTML = '<option value="">هیچ دسته‌بندی یافت نشد</option>';
+      return;
+    }
+
+    categories.forEach(cat => {
+      const option = document.createElement('option');
+      option.value = cat._id;
+      option.textContent = cat.name;
+      categorySelect.appendChild(option);
+    });
+  } catch (err) {
+    console.error('خطا در دریافت دسته‌بندی‌ها:', err);
+    categorySelect.innerHTML = '<option value="">خطا در دریافت دسته‌بندی‌ها</option>';
+  }
 }
 
 // دریافت منوی غذاها از بک‌اند
