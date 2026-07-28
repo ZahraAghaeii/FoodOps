@@ -19,8 +19,9 @@ window.onload = () => {
     userNameElem.innerText = `خوش آمدید، ${user.name}`;
   }
 
-  // افزودن دکمه صف آشپزخانه
+  // افزودن دکمه‌های مدیریتی براساس نقش کاربر
   renderKitchenButton(user);
+  renderDeliveryButton(user);
 
   fetchMenu();
   fetchCategories();
@@ -55,7 +56,7 @@ function renderKitchenButton(user) {
       text-decoration: none;
       font-weight: bold;
       font-size: 13px;
-      margin: 0 10px;
+      margin: 0 5px;
       display: inline-block;
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
       transition: background 0.2s;
@@ -65,21 +66,65 @@ function renderKitchenButton(user) {
     kitchenBtn.onmouseover = () => kitchenBtn.style.backgroundColor = '#e67e22';
     kitchenBtn.onmouseout = () => kitchenBtn.style.backgroundColor = '#ff9800';
 
-    // پیدا کردن محل تزریق دکمه در هدر
-    const logoutBtn = document.querySelector('button[onclick*="logout"]') || 
-                      document.getElementById('logoutBtn') || 
-                      document.querySelector('.btn-danger') ||
-                      document.querySelector('button');
+    injectHeaderBtn(kitchenBtn);
+  }
+}
 
-    const userNameElem = document.getElementById('userName');
+// نمایش مشروط دکمه پنل تحویل برای صندوق‌دار (Cashier) و ادمین (Admin)
+function renderDeliveryButton(user) {
+  if (!user) return;
 
-    if (logoutBtn && logoutBtn.parentNode) {
-      logoutBtn.parentNode.insertBefore(kitchenBtn, logoutBtn.nextSibling);
-    } else if (userNameElem && userNameElem.parentNode) {
-      userNameElem.parentNode.insertBefore(kitchenBtn, userNameElem);
-    } else {
-      document.body.prepend(kitchenBtn);
-    }
+  const userRole = String(user.role || user.type || '').toLowerCase().trim();
+
+  // فقط صندوق‌دار و ادمین
+  const isAllowed = userRole.includes('cashier') || 
+                    userRole.includes('admin') || 
+                    userRole.includes('delivery');
+
+  if (isAllowed) {
+    if (document.getElementById('deliveryNavBtn')) return;
+
+    const deliveryBtn = document.createElement('a');
+    deliveryBtn.id = 'deliveryNavBtn';
+    deliveryBtn.href = 'delivery.html';
+    deliveryBtn.innerText = '📦 تحویل سفارشات';
+    deliveryBtn.style.cssText = `
+      background-color: #27ae60;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 13px;
+      margin: 0 5px;
+      display: inline-block;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      transition: background 0.2s;
+      cursor: pointer;
+    `;
+
+    deliveryBtn.onmouseover = () => deliveryBtn.style.backgroundColor = '#219150';
+    deliveryBtn.onmouseout = () => deliveryBtn.style.backgroundColor = '#27ae60';
+
+    injectHeaderBtn(deliveryBtn);
+  }
+}
+
+// تابع کمکی برای تزریق دکمه‌ها در هدر پیش از دکمه خروج/نام کاربر
+function injectHeaderBtn(buttonElem) {
+  const logoutBtn = document.querySelector('button[onclick*="logout"]') || 
+                    document.getElementById('logoutBtn') || 
+                    document.querySelector('.btn-danger') ||
+                    document.querySelector('button');
+
+  const userNameElem = document.getElementById('userName');
+
+  if (logoutBtn && logoutBtn.parentNode) {
+    logoutBtn.parentNode.insertBefore(buttonElem, logoutBtn);
+  } else if (userNameElem && userNameElem.parentNode) {
+    userNameElem.parentNode.insertBefore(buttonElem, userNameElem);
+  } else {
+    document.body.prepend(buttonElem);
   }
 }
 

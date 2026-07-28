@@ -207,3 +207,25 @@ button:hover {
   text-align: center;
   width: 100%;
 }
+
+/* ========================================== */
+/*          Delivery Dashboard Styles         */
+/* ========================================== */
+
+.order-card.status-delivered { 
+  border-top-color: #27ae60; 
+}
+
+.btn-deliver {
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.btn-deliver:hover {
+  background-color: #219150;
+}
