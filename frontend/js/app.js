@@ -19,9 +19,69 @@ window.onload = () => {
     userNameElem.innerText = `خوش آمدید، ${user.name}`;
   }
 
+  // افزودن دکمه صف آشپزخانه
+  renderKitchenButton(user);
+
   fetchMenu();
   fetchCategories();
 };
+
+// نمایش مشروط دکمه صف آشپزخانه برای نقش‌های مجاز
+function renderKitchenButton(user) {
+  if (!user) return;
+
+  // استخراج نقش کاربر
+  const userRole = String(user.role || user.type || '').toLowerCase().trim();
+
+  // پشتیبانی از kitchen، staff، admin و ترکیبات آن‌ها مثل "kitchen staff"
+  const isAllowed = userRole.includes('kitchen') || 
+                    userRole.includes('staff') || 
+                    userRole.includes('admin') || 
+                    userRole.includes('cook') || 
+                    userRole.includes('chef');
+
+  if (isAllowed) {
+    if (document.getElementById('kitchenNavBtn')) return;
+
+    const kitchenBtn = document.createElement('a');
+    kitchenBtn.id = 'kitchenNavBtn';
+    kitchenBtn.href = 'kitchen.html';
+    kitchenBtn.innerText = '👨‍🍳 صف آشپزخانه';
+    kitchenBtn.style.cssText = `
+      background-color: #ff9800;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 13px;
+      margin: 0 10px;
+      display: inline-block;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      transition: background 0.2s;
+      cursor: pointer;
+    `;
+
+    kitchenBtn.onmouseover = () => kitchenBtn.style.backgroundColor = '#e67e22';
+    kitchenBtn.onmouseout = () => kitchenBtn.style.backgroundColor = '#ff9800';
+
+    // پیدا کردن محل تزریق دکمه در هدر
+    const logoutBtn = document.querySelector('button[onclick*="logout"]') || 
+                      document.getElementById('logoutBtn') || 
+                      document.querySelector('.btn-danger') ||
+                      document.querySelector('button');
+
+    const userNameElem = document.getElementById('userName');
+
+    if (logoutBtn && logoutBtn.parentNode) {
+      logoutBtn.parentNode.insertBefore(kitchenBtn, logoutBtn.nextSibling);
+    } else if (userNameElem && userNameElem.parentNode) {
+      userNameElem.parentNode.insertBefore(kitchenBtn, userNameElem);
+    } else {
+      document.body.prepend(kitchenBtn);
+    }
+  }
+}
 
 // خروج از حساب کاربری
 function logout() {
@@ -76,7 +136,6 @@ async function fetchMenu() {
     menuItems.forEach(item => {
       if (!item.isAvailable) return;
 
-      // بررسی وجود دسته‌بندی و استخراج نام آن (در صورتی که بک‌اند populate کرده باشد)
       const categoryName = item.category && item.category.name 
         ? item.category.name 
         : 'بدون دسته‌بندی';
@@ -144,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (response.ok) {
           alert('غذا با موفقیت به منو اضافه شد!');
           addMenuForm.reset();
-          fetchMenu(); // به‌روزرسانی آنی منو در صفحه
+          fetchMenu();
         } else {
           alert(`خطا: ${data.message || 'مشکلی در ثبت غذا پیش آمد'}`);
         }
