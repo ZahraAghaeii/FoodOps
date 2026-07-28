@@ -6,6 +6,7 @@ const {
   getKitchenOrders,
   startOrder,
   readyOrder,
+  deliverOrder,
   updateOrderStatus
 } = require('../controllers/orderController');
 const { protect } = require('../middleware/authMiddleware');
@@ -20,10 +21,11 @@ router.post('/', createOrder);
 router.get('/me', getMyOrders);
 router.get('/my-orders', getMyOrders);
 
-// روت‌های صف آشپزخانه و تغییر وضعیت
+// روت‌های صف آشپزخانه و تحویل سفارش
 router.get('/kitchen', getKitchenOrders);
 router.patch('/:id/start', startOrder);
 router.patch('/:id/ready', readyOrder);
+router.patch('/:id/deliver', deliverOrder);
 router.patch('/:id/status', updateOrderStatus);
 
 module.exports = router;

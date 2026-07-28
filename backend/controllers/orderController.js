@@ -6,7 +6,7 @@ const MenuItem = require('../models/MenuItem');
 // @access  Private (Customer)
 exports.createOrder = async (req, res) => {
   try {
-    const { items } = req.body; // items: [{ menuItem: "ID", quantity: 2 }]
+    const { items } = req.body;
 
     if (!items || items.length === 0) {
       return res.status(400).json({ message: 'سبد خرید شما خالی است' });
@@ -15,7 +15,6 @@ exports.createOrder = async (req, res) => {
     let totalPrice = 0;
     const orderItems = [];
 
-    // محاسبه قیمت کل و صحت‌سنجی آیتم‌ها در سمت سرور
     for (const item of items) {
       const menuItem = await MenuItem.findById(item.menuItem);
       if (!menuItem) {
@@ -33,12 +32,11 @@ exports.createOrder = async (req, res) => {
       });
     }
 
-    // اصلاح فیلد customer و status مطابق با مدل دیتابیس
     const order = await Order.create({
-      customer: req.user._id, // تغییر user به customer
+      customer: req.user._id,
       items: orderItems,
       totalPrice,
-      status: 'Pending' // تغییر به Pending با حرف اول بزرگ
+      status: 'Pending'
     });
 
     res.status(201).json(order);
@@ -69,9 +67,9 @@ exports.getMyOrders = async (req, res) => {
 exports.getKitchenOrders = async (req, res) => {
   try {
     const orders = await Order.find({ status: { $ne: 'Delivered' } })
-      .populate('customer', 'name email') // تغییر user به customer
+      .populate('customer', 'name email')
       .populate('items.menuItem', 'name price')
-      .sort({ createdAt: 1 }); // سفارش‌های قدیمی‌تر اول صف قرار می‌گیرند
+      .sort({ createdAt: 1 });
 
     res.json(orders);
   } catch (error) {
@@ -90,7 +88,7 @@ exports.startOrder = async (req, res) => {
       return res.status(404).json({ message: 'سفارش یافت نشد' });
     }
 
-    order.status = 'Preparing'; // هماهنگ با Enum مدل
+    order.status = 'Preparing';
     const updatedOrder = await order.save();
 
     res.json({ message: 'وضعیت سفارش به در حال آماده‌سازی تغییر یافت', order: updatedOrder });
@@ -110,12 +108,32 @@ exports.readyOrder = async (req, res) => {
       return res.status(404).json({ message: 'سفارش یافت نشد' });
     }
 
-    order.status = 'Ready'; // هماهنگ با Enum مدل
+    order.status = 'Ready';
     const updatedOrder = await order.save();
 
     res.json({ message: 'سفارش آماده تحویل شد', order: updatedOrder });
   } catch (error) {
     res.status(500).json({ message: 'خطا در تغییر وضعیت سفارش', error: error.message });
+  }
+};
+
+// @desc    تحویل سفارش به مشتری (توسط صندوق‌دار/تحویل‌دهنده)
+// @route   PATCH /api/orders/:id/deliver
+// @access  Private (Cashier / Staff / Admin)
+exports.deliverOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res.status(404).json({ message: 'سفارش یافت نشد' });
+    }
+
+    order.status = 'Delivered';
+    const updatedOrder = await order.save();
+
+    res.json({ message: 'سفارش با موفقیت تحویل مشتری شد', order: updatedOrder });
+  } catch (error) {
+    res.status(500).json({ message: 'خطا در تحویل سفارش', error: error.message });
   }
 };
 
