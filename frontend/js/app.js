@@ -33,14 +33,14 @@ function renderKitchenButton(user) {
 
   // استخراج نقش کاربر
   const userRole = String(user.role || user.type || '').toLowerCase().trim();
-
+  console.log(userRole);
   // پشتیبانی از kitchen، staff، admin و ترکیبات آن‌ها مثل "kitchen staff"
   const isAllowed = userRole.includes('kitchen') || 
                     userRole.includes('staff') || 
                     userRole.includes('admin') || 
                     userRole.includes('cook') || 
                     userRole.includes('chef');
-
+  
   if (isAllowed) {
     if (document.getElementById('kitchenNavBtn')) return;
 
