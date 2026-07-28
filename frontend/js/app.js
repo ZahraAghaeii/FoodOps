@@ -30,7 +30,7 @@ window.onload = () => {
 // نمایش مشروط دکمه صف آشپزخانه برای نقش‌های مجاز
 function renderKitchenButton(user) {
   if (!user) return;
-
+  console.log('hello')
   // استخراج نقش کاربر
   const userRole = String(user.role || user.type || '').toLowerCase().trim();
   console.log(userRole);
@@ -58,7 +58,7 @@ function renderKitchenButton(user) {
       font-size: 13px;
       margin: 0 5px;
       display: inline-block;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 4px rgba(83, 70, 70, 0.2);
       transition: background 0.2s;
       cursor: pointer;
     `;
