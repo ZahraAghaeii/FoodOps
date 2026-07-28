@@ -220,8 +220,7 @@ async function submitOrder() {
   const token = localStorage.getItem('token');
   const itemsPayload = cart.map(i => ({
     menuItem: i.menuItem,
-    quantity: i.quantity,
-    priceAtOrder: i.priceAtOrder
+    quantity: i.quantity
   }));
 
   try {

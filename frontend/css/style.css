@@ -113,3 +113,97 @@ button:hover {
   font-size: 1.1rem;
   margin: 10px 0;
 }
+
+/* ========================================== */
+/*           Kitchen Dashboard Styles         */
+/* ========================================== */
+
+.kitchen-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  padding: 15px 25px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  margin-bottom: 25px;
+}
+
+.orders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.order-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 15px 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border-top: 5px solid #ccc;
+}
+
+.order-card.status-pending { 
+  border-top-color: #f39c12; 
+}
+
+.order-card.status-in_preparation { 
+  border-top-color: #3498db; 
+}
+
+.order-card.status-ready { 
+  border-top-color: #2ecc71; 
+}
+
+.order-card h3 {
+  margin-top: 0;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.order-card ul {
+  padding-right: 20px;
+  margin: 15px 0;
+}
+
+.order-card li {
+  margin-bottom: 5px;
+  color: #555;
+}
+
+.card-actions {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+.btn-start {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.btn-ready {
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.badge-done {
+  display: inline-block;
+  background-color: #2ecc71;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  text-align: center;
+  width: 100%;
+}

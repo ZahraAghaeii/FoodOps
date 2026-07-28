@@ -3,20 +3,27 @@ const router = express.Router();
 const {
   createOrder,
   getMyOrders,
-  getAllOrders,
+  getKitchenOrders,
+  startOrder,
+  readyOrder,
   updateOrderStatus
 } = require('../controllers/orderController');
-const { protect, authorize } = require('../middleware/authMiddleware');
+const { protect } = require('../middleware/authMiddleware');
 
-// دریافت سفارش‌های کاربر جاری و ثبت سفارش جدید
-router
-  .route('/')
-  .post(protect, createOrder)
-  .get(protect, authorize('Staff', 'Admin'), getAllOrders);
+// تمامی روت‌ها نیازمند احراز هویت هستند
+router.use(protect);
 
-router.get('/my-orders', protect, getMyOrders);
+// ثبت سفارش جدید توسط مشتری
+router.post('/', createOrder);
 
-// تغییر وضعیت سفارش توسط پرسنل/ادمین
-router.put('/:id/status', protect, authorize('Staff', 'Admin'), updateOrderStatus);
+// دریافت سفارش‌های کاربر جاری
+router.get('/me', getMyOrders);
+router.get('/my-orders', getMyOrders);
+
+// روت‌های صف آشپزخانه و تغییر وضعیت
+router.get('/kitchen', getKitchenOrders);
+router.patch('/:id/start', startOrder);
+router.patch('/:id/ready', readyOrder);
+router.patch('/:id/status', updateOrderStatus);
 
 module.exports = router;
