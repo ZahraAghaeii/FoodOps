@@ -27,6 +27,8 @@ window.onload = () => {
   fetchCategories();
 };
 
+
+
 // نمایش مشروط دکمه صف آشپزخانه برای نقش‌های مجاز
 function renderKitchenButton(user) {
   if (!user) return;
@@ -210,6 +212,24 @@ async function fetchMenu() {
     }
   }
 }
+document.addEventListener("DOMContentLoaded", () => {
+    // دریافت اطلاعات کاربر ذخیره شده در سیستم (هنگام لاگین)
+    const userStr = localStorage.getItem("user");
+    const cartNavItem = document.getElementById("cart-nav-item");
+
+    if (userStr && cartNavItem) {
+        const user = JSON.parse(userStr);
+        
+        // بررسی نقش کاربر
+        if (user.role === "Customer") {
+            // اگر مشتری بود، سبد خرید نمایش داده شود
+            cartNavItem.style.display = "block"; 
+        } else {
+            // برای ادمین، آشپزخانه و صندوق‌دار مخفی بماند
+            cartNavItem.style.display = "none"; 
+        }
+    }
+});
 
 // ثبت غذای جدید از طریق فرم فرانت‌اند
 document.addEventListener('DOMContentLoaded', () => {
