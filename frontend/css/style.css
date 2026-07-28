@@ -121,7 +121,7 @@ button:hover {
 .kitchen-header {
   display: flex;
   justify-content: space-between;
-  align-itzems: center;
+  align-items: center;
   background: #fff;
   padding: 15px 25px;
   border-radius: 8px;
