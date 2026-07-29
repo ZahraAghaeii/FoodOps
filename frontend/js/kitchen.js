@@ -12,6 +12,13 @@ window.onload = () => {
   setInterval(fetchKitchenOrders, 10000);
 };
 
+// تابع تبدیل تاریخ ایجاد به ساعت و دقیقه فارسی (مثلاً ۱۴:۳۵)
+function formatOrderTime(dateString) {
+  if (!dateString) return 'نامشخص';
+  const date = new Date(dateString);
+  return date.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+}
+
 // دریافت سفارش‌های صف آشپزخانه
 async function fetchKitchenOrders() {
   const token = localStorage.getItem('token');
@@ -60,6 +67,9 @@ function renderKitchenOrders(orders) {
       `<li>${i.menuItem ? i.menuItem.name : 'آیتم حذف شده'} × ${i.quantity}</li>`
     ).join('');
 
+    // دریافت و فرمت زمان ثبت سفارش
+    const orderTime = formatOrderTime(order.createdAt);
+
     // ساخت دکمه مدیریت وضعیت (محدود به آشپزخانه: فقط شروع و آماده تحویل)
     let actionButton = '';
     if (order.status === 'Pending') {
@@ -73,7 +83,10 @@ function renderKitchenOrders(orders) {
     const customerName = order.customer ? order.customer.name : 'مشتری';
 
     card.innerHTML = `
-      <div style="font-weight: bold; margin-bottom: 8px;">سفارش کد: ${order._id.slice(-4)}</div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span style="font-weight: bold;">سفارش کد: ${order._id.slice(-4)}</span>
+        <span style="font-size: 12px; color: #555; background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-weight: bold;">⏰ ${orderTime}</span>
+      </div>
       <div style="font-size: 13px; color: #555; margin-bottom: 5px;">مشتری: ${customerName}</div>
       <div style="font-size: 13px; color: #555; margin-bottom: 10px;">وضعیت: <span style="color: #e67e22; font-weight: bold;">${order.status}</span></div>
       <ul style="padding-right: 20px; font-size: 14px; margin-bottom: 15px; line-height: 1.6;">${itemsList}</ul>
