@@ -1,0 +1,193 @@
+const API_AUTH = 'http://localhost:5000/api/auth';
+
+window.onload = () => {
+  const token = localStorage.getItem('token');
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+  if (!token || !user) {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  // دریافت اطلاعات پروفایل جاری
+  fetchProfile();
+
+  // کنترل دسترسی بخش‌های مدیریتی ادمین
+  const userRole = String(user.role || user.type || '').toLowerCase().trim();
+  if (userRole.includes('admin')) {
+    const staffSec = document.getElementById('admin-create-staff-section');
+    const usersSec = document.getElementById('admin-users-list-section');
+
+    if (staffSec) staffSec.style.display = 'block';
+    if (usersSec) usersSec.style.display = 'block';
+
+    fetchAllUsers();
+  }
+};
+
+// دریافت اطلاعات کاربر لاگین شده
+async function fetchProfile() {
+  const token = localStorage.getItem('token');
+  try {
+    const res = await fetch(`${API_AUTH}/me`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      document.getElementById('prof-name').value = data.name || '';
+      document.getElementById('prof-email').value = data.email || '';
+      document.getElementById('prof-phone').value = data.phone || '';
+    }
+  } catch (err) {
+    console.error('خطا در دریافت پروفایل:', err);
+  }
+}
+
+// ثبت ویرایش پروفایل شخصی
+document.getElementById('profile-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const token = localStorage.getItem('token');
+
+  const payload = {
+    name: document.getElementById('prof-name').value,
+    email: document.getElementById('prof-email').value,
+    phone: document.getElementById('prof-phone').value
+  };
+
+  const pass = document.getElementById('prof-password').value;
+  if (pass.trim() !== '') {
+    payload.password = pass;
+  }
+
+  try {
+    const res = await fetch(`${API_AUTH}/profile`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      alert('اطلاعات پروفایل شما با موفقیت بروزرسانی شد! 🎉');
+      localStorage.setItem('user', JSON.stringify(data));
+      document.getElementById('prof-password').value = '';
+    } else {
+      alert(data.message || 'خطا در ویرایش پروفایل');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('ارتباط با سرور برقرار نشد.');
+  }
+});
+
+// دریافت لیست کاربران جهت نمایش به ادمین
+async function fetchAllUsers() {
+  const token = localStorage.getItem('token');
+  try {
+    const res = await fetch(`${API_AUTH}/users`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const users = await res.json();
+
+    const tbody = document.getElementById('users-table-body');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+
+    if (!Array.isArray(users) || users.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5">هیچ کاربری یافت نشد.</td></tr>';
+      return;
+    }
+
+    users.forEach(u => {
+      const tr = document.createElement('tr');
+      const roleStr = String(u.role || 'Customer');
+      const roleLower = roleStr.toLowerCase().replace(/\s+/g, '');
+
+      tr.innerHTML = `
+        <td>${u.name}</td>
+        <td>${u.email}</td>
+        <td>${u.phone || 'ثبت نشده'}</td>
+        <td><span class="role-badge role-${roleLower}">${roleStr}</span></td>
+        <td>
+          <select onchange="changeUserRole('${u._id}', this.value)" style="padding: 4px; border-radius: 4px; font-family: inherit;">
+            <option value="Customer" ${roleStr === 'Customer' ? 'selected' : ''}>مشتری (Customer)</option>
+            <option value="Kitchen Staff" ${roleStr === 'Kitchen Staff' || roleStr === 'Kitchen' ? 'selected' : ''}>آشپزخانه (Kitchen Staff)</option>
+            <option value="Cashier" ${roleStr === 'Cashier' ? 'selected' : ''}>صندوق‌دار (Cashier)</option>
+            <option value="Admin" ${roleStr === 'Admin' ? 'selected' : ''}>ادمین (Admin)</option>
+          </select>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch (err) {
+    console.error('خطا در دریافت کاربران:', err);
+  }
+}
+
+// تغییر نقش یک کاربر توسط ادمین
+async function changeUserRole(userId, newRole) {
+  const token = localStorage.getItem('token');
+  try {
+    const res = await fetch(`${API_AUTH}/users/${userId}/role`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ role: newRole })
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      alert('نقش کاربر با موفقیت تغییر کرد! 🎉');
+      fetchAllUsers();
+    } else {
+      alert(data.message || 'خطا در تغییر نقش');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('خطا در ارتباط با سرور');
+  }
+}
+
+// ثبت‌نام پرسنل جدید توسط ادمین
+document.getElementById('create-staff-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const token = localStorage.getItem('token');
+
+  const payload = {
+    name: document.getElementById('staff-name').value,
+    email: document.getElementById('staff-email').value,
+    phone: document.getElementById('staff-phone').value,
+    password: document.getElementById('staff-password').value,
+    role: document.getElementById('staff-role').value
+  };
+
+  try {
+    const res = await fetch(`${API_AUTH}/staff`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      alert('پرسنل جدید با موفقیت ثبت شد!');
+      document.getElementById('create-staff-form').reset();
+      fetchAllUsers();
+    } else {
+      alert(data.message || 'خطا در ثبت پرسنل');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('خطا در ارتباط با سرور');
+  }
+});

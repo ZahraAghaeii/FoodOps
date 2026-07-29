@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FoodOps - پروفایل و مدیریت کاربران</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header>
+    <h1>مدیریت حساب و کاربران FoodOps</h1>
+    <div class="header-right">
+      <a href="index.html" class="btn-profile-link">🏠 بازگشت به منو</a>
+      <button class="btn-logout" onclick="logout()">خروج</button>
+    </div>
+  </header>
+
+  <div class="profile-container">
+
+    <!-- بخش ۱: ویرایش اطلاعات شخصی کاربر -->
+    <div class="card-box">
+      <h2>👤 ویرایش اطلاعات شخصی</h2>
+      <form id="profile-form">
+        <div class="profile-form-grid">
+          <div class="form-group">
+            <label>نام و نام خانوادگی:</label>
+            <input type="text" id="prof-name" required />
+          </div>
+          <div class="form-group">
+            <label>آدرس ایمیل:</label>
+            <input type="email" id="prof-email" required />
+          </div>
+          <div class="form-group">
+            <label>شماره تلفن:</label>
+            <input type="text" id="prof-phone" placeholder="09123456789" />
+          </div>
+          <div class="form-group">
+            <label>رمز عبور جدید (در صورت عدم تغییر خالی بگذارید):</label>
+            <input type="password" id="prof-password" placeholder="******" />
+          </div>
+        </div>
+        <button type="submit" class="btn-save-prof">ذخیره تغییرات پروفایل</button>
+      </form>
+    </div>
+
+    <!-- بخش ۲: ثبت پرسنل جدید (فقط برای ادمین) -->
+    <div id="admin-create-staff-section" class="card-box" style="display: none;">
+      <h2>➕ ثبت‌نام پرسنل جدید (آشپزخانه / صندوق‌دار)</h2>
+      <form id="create-staff-form">
+        <div class="profile-form-grid">
+          <div class="form-group">
+            <label>نام کامل:</label>
+            <input type="text" id="staff-name" required />
+          </div>
+          <div class="form-group">
+            <label>ایمیل:</label>
+            <input type="email" id="staff-email" required />
+          </div>
+          <div class="form-group">
+            <label>شماره تلفن:</label>
+            <input type="text" id="staff-phone" placeholder="09123456789" />
+          </div>
+          <div class="form-group">
+            <label>رمز عبور اولیه:</label>
+            <input type="password" id="staff-password" required />
+          </div>
+          <div class="form-group">
+            <label>تعیین نقش:</label>
+            <select id="staff-role" required>
+              <option value="Kitchen Staff">مسئول آشپزخانه (Kitchen Staff)</option>
+              <option value="Cashier">صندوق‌دار (Cashier)</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="btn-create-staff">ثبت پرسنل جدید</button>
+      </form>
+    </div>
+
+    <!-- بخش ۳: لیست تمام کاربران و تغییر نقش (فقط برای ادمین) -->
+    <div id="admin-users-list-section" class="card-box" style="display: none;">
+      <h2>👥 مدیریت و مشاهده تمام کاربران</h2>
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>نام</th>
+            <th>ایمیل</th>
+            <th>تلفن</th>
+            <th>نقش فعلی</th>
+            <th>تغییر نقش</th>
+          </tr>
+        </thead>
+        <tbody id="users-table-body">
+          <tr><td colspan="5">در حال دریافت کاربران...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/profile.js"></script>
+</body>
+</html>
