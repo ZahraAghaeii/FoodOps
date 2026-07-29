@@ -218,7 +218,7 @@ function renderMenuGrid(items) {
     return;
   }
 
-  // بررسی نقش ادمین برای نمایش دکمه ویرایش قیمت
+  // بررسی نقش ادمین برای نمایش دکمه‌های ویرایش و حذف
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const userRole = String(user.role || user.type || '').toLowerCase().trim();
   const isAdmin = userRole.includes('admin');
@@ -244,9 +244,14 @@ function renderMenuGrid(items) {
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
           <div class="food-price">${Number(item.price).toLocaleString('fa-IR')} تومان</div>
           ${isAdmin ? `
-            <button onclick="editPrice('${item._id}', ${item.price})" style="background: #f39c12; color: white; border: none; padding: 3px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; transition: 0.2s;">
-              ✏️ ویرایش قیمت
-            </button>
+            <div style="display: flex; gap: 4px;">
+              <button onclick="editPrice('${item._id}', ${item.price})" style="background: #f39c12; color: white; border: none; padding: 3px 6px; border-radius: 4px; font-size: 11px; cursor: pointer;">
+                ✏️ ویرایش
+              </button>
+              <button onclick="deleteMenuItem('${item._id}', '${item.name}')" style="background: #e74c3c; color: white; border: none; padding: 3px 6px; border-radius: 4px; font-size: 11px; cursor: pointer;">
+                🗑️ حذف
+              </button>
+            </div>
           ` : ''}
         </div>
         <button class="btn-add" onclick="addToCart('${item._id}', '${item.name}', ${item.price})">افزودن به سبد</button>
@@ -286,6 +291,34 @@ async function editPrice(itemId, currentPrice) {
       fetchMenu(); // بروزرسانی منو
     } else {
       alert(data.message || 'خطا در ویرایش قیمت');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('ارتباط با سرور برقرار نشد.');
+  }
+}
+
+// تابع حذف غذای انتخاب‌شده (مخصوص ادمین)
+async function deleteMenuItem(itemId, itemName) {
+  const confirmDelete = confirm(`آیا از حذف آیتم «${itemName}» اطمینان دارید؟`);
+  if (!confirmDelete) return;
+
+  const token = localStorage.getItem('token');
+  try {
+    const res = await fetch(`${API_MENU}/${itemId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      alert(`آیتم «${itemName}» با موفقیت حذف شد! 🗑️`);
+      fetchMenu(); // دریافت مجدد منو جهت بروزرسانی گرید
+    } else {
+      alert(data.message || 'خطا در حذف آیتم');
     }
   } catch (err) {
     console.error(err);
