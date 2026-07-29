@@ -167,7 +167,6 @@ async function fetchCategories() {
     }
 
     categories.forEach(cat => {
-      // ۱. پر کردن Dropdown ثبت غذا
       if (categorySelect) {
         const option = document.createElement('option');
         option.value = cat._id;
@@ -175,7 +174,6 @@ async function fetchCategories() {
         categorySelect.appendChild(option);
       }
 
-      // ۲. ساخت دکمه فیلتر دسته‌بندی برای منو
       if (filterBar) {
         const btn = document.createElement('button');
         btn.className = 'filter-btn';
@@ -206,7 +204,7 @@ async function fetchMenu() {
   }
 }
 
-// رندر کردن غذاها در گرید فرانت‌اند
+// رندر کردن غذاها در گرید فرانت‌اند (به همراه مدیریت موجودی)
 function renderMenuGrid(items) {
   const menuGrid = document.getElementById('menuGrid');
   if (!menuGrid) return;
@@ -218,50 +216,134 @@ function renderMenuGrid(items) {
     return;
   }
 
-  // بررسی نقش ادمین برای نمایش دکمه‌های ویرایش و حذف
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const userRole = String(user.role || user.type || '').toLowerCase().trim();
   const isAdmin = userRole.includes('admin');
 
   items.forEach(item => {
-    if (!item.isAvailable) return;
+    const stockCount = item.stock !== undefined ? item.stock : 0;
+    const isOutOfStock = !item.isAvailable || stockCount <= 0;
 
+    // کاربران عادی غذاهای ناموجود را هم می‌بینند ولی دکمه‌شان غیرفعال است
     const categoryName = item.category && item.category.name 
       ? item.category.name 
       : 'بدون دسته‌بندی';
 
     const card = document.createElement('div');
     card.className = 'food-card';
+
+    // ساخت دکمه‌های کنترل ادمین
+    const adminControls = isAdmin ? `
+      <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px;">
+        <button onclick="editPrice('${item._id}', ${item.price})" style="background: #f39c12; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;">
+          ✏️ ویرایش قیمت
+        </button>
+        <button onclick="editStock('${item._id}', ${stockCount})" style="background: #3498db; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;">
+          📦 موجودی (${stockCount})
+        </button>
+        <button onclick="toggleAvailability('${item._id}', ${item.isAvailable})" style="background: ${item.isAvailable ? '#27ae60' : '#7f8c8d'}; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;">
+          ${item.isAvailable ? '👁️ فعال' : '🙈 غیرفعال'}
+        </button>
+        <button onclick="deleteMenuItem('${item._id}', '${item.name}')" style="background: #e74c3c; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;">
+          🗑️ حذف
+        </button>
+      </div>
+    ` : '';
+
+    // دکمه ثبت/افزودن به سبد
+    const actionButton = isOutOfStock
+      ? `<button class="btn-add" disabled style="background: #e74c3c; cursor: not-allowed; opacity: 0.8;">❌ ناموجود</button>`
+      : `<button class="btn-add" onclick="addToCart('${item._id}', '${item.name}', ${item.price}, ${stockCount})">افزودن به سبد</button>`;
+
     card.innerHTML = `
       <div>
-        <span style="font-size: 11px; background: #e0e0e0; color: #555; padding: 2px 8px; border-radius: 10px; display: inline-block; margin-bottom: 6px;">
-          ${categoryName}
-        </span>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <span style="font-size: 11px; background: #e0e0e0; color: #555; padding: 2px 8px; border-radius: 10px;">
+            ${categoryName}
+          </span>
+          <span style="font-size: 11px; font-weight: bold; color: ${isOutOfStock ? '#e74c3c' : '#27ae60'};">
+            ${isOutOfStock ? 'ناموجود' : `موجودی: ${stockCount} عدد`}
+          </span>
+        </div>
         <h3>${item.name}</h3>
         <p>${item.description || 'بدون توضیح'}</p>
       </div>
       <div>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <div class="food-price">${Number(item.price).toLocaleString('fa-IR')} تومان</div>
-          ${isAdmin ? `
-            <div style="display: flex; gap: 4px;">
-              <button onclick="editPrice('${item._id}', ${item.price})" style="background: #f39c12; color: white; border: none; padding: 3px 6px; border-radius: 4px; font-size: 11px; cursor: pointer;">
-                ✏️ ویرایش
-              </button>
-              <button onclick="deleteMenuItem('${item._id}', '${item.name}')" style="background: #e74c3c; color: white; border: none; padding: 3px 6px; border-radius: 4px; font-size: 11px; cursor: pointer;">
-                🗑️ حذف
-              </button>
-            </div>
-          ` : ''}
+        <div style="font-weight:bold; font-size: 15px; color: #d35400; margin-bottom: 8px;">
+          ${Number(item.price).toLocaleString('fa-IR')} تومان
         </div>
-        <button class="btn-add" onclick="addToCart('${item._id}', '${item.name}', ${item.price})">افزودن به سبد</button>
+        ${adminControls}
+        ${actionButton}
       </div>
     `;
     menuGrid.appendChild(card);
   });
 }
 
-// تابع ویرایش قیمت غذای انتخاب‌شده (مخصوص ادمین)
+// تغییر تعداد موجودی (مخصوص ادمین)
+async function editStock(itemId, currentStock) {
+  const newStock = prompt('تعداد موجودی جدید را وارد کنید:', currentStock);
+
+  if (newStock === null || newStock.trim() === '') return;
+
+  const stockNum = Number(newStock);
+  if (isNaN(stockNum) || stockNum < 0) {
+    alert('لطفاً یک عدد معتبر وارد کنید.');
+    return;
+  }
+
+  const token = localStorage.getItem('token');
+  try {
+    const res = await fetch(`${API_MENU}/${itemId}/stock`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ stock: stockNum })
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      alert('موجودی با موفقیت بروزرسانی شد! 📦');
+      fetchMenu();
+    } else {
+      alert(data.message || 'خطا در ویرایش موجودی');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('ارتباط با سرور برقرار نشد.');
+  }
+}
+
+// تغییر وضعیت فعال/غیرفعال بودن آیتم (مخصوص ادمین)
+async function toggleAvailability(itemId, currentStatus) {
+  const token = localStorage.getItem('token');
+  try {
+    const res = await fetch(`${API_MENU}/${itemId}/availability`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ isAvailable: !currentStatus })
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      fetchMenu();
+    } else {
+      alert(data.message || 'خطا در تغییر وضعیت');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('ارتباط با سرور برقرار نشد.');
+  }
+}
+
+// ویرایش قیمت (مخصوص ادمین)
 async function editPrice(itemId, currentPrice) {
   const newPrice = prompt('قیمت جدید را به تومان وارد کنید:', currentPrice);
 
@@ -288,7 +370,7 @@ async function editPrice(itemId, currentPrice) {
 
     if (res.ok) {
       alert('قیمت با موفقیت تغییر کرد! 🎉');
-      fetchMenu(); // بروزرسانی منو
+      fetchMenu();
     } else {
       alert(data.message || 'خطا در ویرایش قیمت');
     }
@@ -298,7 +380,7 @@ async function editPrice(itemId, currentPrice) {
   }
 }
 
-// تابع حذف غذای انتخاب‌شده (مخصوص ادمین)
+// حذف غذای انتخاب‌شده (مخصوص ادمین)
 async function deleteMenuItem(itemId, itemName) {
   const confirmDelete = confirm(`آیا از حذف آیتم «${itemName}» اطمینان دارید؟`);
   if (!confirmDelete) return;
@@ -316,7 +398,7 @@ async function deleteMenuItem(itemId, itemName) {
 
     if (res.ok) {
       alert(`آیتم «${itemName}» با موفقیت حذف شد! 🗑️`);
-      fetchMenu(); // دریافت مجدد منو جهت بروزرسانی گرید
+      fetchMenu();
     } else {
       alert(data.message || 'خطا در حذف آیتم');
     }
@@ -326,9 +408,8 @@ async function deleteMenuItem(itemId, itemName) {
   }
 }
 
-// فیلتر کردن غذاها بر اساس دسته‌بندی انتخاب‌شده
+// فیلتر کردن غذاها بر اساس دسته‌بندی
 function filterMenu(categoryId, btnElement) {
-  // تغییر دکمه فعال
   const buttons = document.querySelectorAll('.filter-btn');
   buttons.forEach(b => b.classList.remove('active'));
   if (btnElement) btnElement.classList.add('active');
@@ -364,7 +445,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // Listenerها برای فرم‌های ادمین
 document.addEventListener('DOMContentLoaded', () => {
 
-  // ۱. ثبت دسته‌بندی جدید توسط ادمین
+  // ۱. ثبت دسته‌بندی جدید
   const addCategoryForm = document.getElementById('add-category-form');
   if (addCategoryForm) {
     addCategoryForm.addEventListener('submit', async (e) => {
@@ -394,7 +475,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (response.ok) {
           alert(`دسته‌بندی «${categoryName}» با موفقیت ثبت شد! 🎉`);
           addCategoryForm.reset();
-          fetchCategories(); // بروزرسانی لحظه‌ای Dropdown و دکمه‌های فیلتر
+          fetchCategories();
         } else {
           alert(`خطا: ${data.message || 'مشکلی در ثبت دسته‌بندی پیش آمد'}`);
         }
@@ -405,7 +486,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ۲. ثبت غذای جدید توسط ادمین
+  // ۲. ثبت غذای جدید (ارسال موجودی اولیه)
   const addMenuForm = document.getElementById('add-menu-form');
   if (addMenuForm) {
     addMenuForm.addEventListener('submit', async (e) => {
@@ -421,6 +502,7 @@ document.addEventListener('DOMContentLoaded', () => {
         name: document.getElementById('menu-name').value,
         description: document.getElementById('menu-desc').value,
         price: Number(document.getElementById('menu-price').value),
+        stock: Number(document.getElementById('menu-stock').value || 10),
         category: document.getElementById('menu-category').value,
         isAvailable: true
       };
@@ -452,13 +534,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// افزودن آیتم به سبد خرید
-function addToCart(id, name, price) {
+// افزودن آیتم به سبد خرید (چک کردن سقف موجودی در فرانت)
+function addToCart(id, name, price, maxStock) {
   const existing = cart.find(i => i.menuItem === id);
   if (existing) {
+    if (existing.quantity >= maxStock) {
+      alert(`تعداد درخواستی نمی‌تواند بیشتر از موجودی انبار (${maxStock} عدد) باشد.`);
+      return;
+    }
     existing.quantity += 1;
   } else {
-    cart.push({ menuItem: id, name, priceAtOrder: price, quantity: 1 });
+    cart.push({ menuItem: id, name, priceAtOrder: price, quantity: 1, maxStock });
   }
   renderCart();
 }
@@ -541,6 +627,7 @@ async function submitOrder() {
       alert('سفارش شما با موفقیت ثبت شد و به آشپزخانه ارسال شد! 🎉');
       cart = [];
       renderCart();
+      fetchMenu(); // به‌روزرسانی لحظه‌ای موجودی منو پس از ثبت سفارش
     } else {
       alert(data.message || 'خطا در ثبت سفارش');
     }

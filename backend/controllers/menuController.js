@@ -6,7 +6,7 @@ const MenuItem = require('../models/MenuItem');
 exports.getMenuItems = async (req, res) => {
   try {
     const { category } = req.query;
-    const query = { isAvailable: true };
+    const query = {};
 
     if (category) {
       query.category = category;
@@ -24,7 +24,7 @@ exports.getMenuItems = async (req, res) => {
 // @access  Private/Admin
 exports.createMenuItem = async (req, res) => {
   try {
-    const { name, description, price, category, imageUrl, isAvailable } = req.body;
+    const { name, description, price, category, imageUrl, isAvailable, stock } = req.body;
 
     const menuItem = await MenuItem.create({
       name,
@@ -32,7 +32,8 @@ exports.createMenuItem = async (req, res) => {
       price,
       category,
       imageUrl,
-      isAvailable
+      isAvailable: isAvailable !== undefined ? isAvailable : true,
+      stock: stock !== undefined ? Number(stock) : 100
     });
 
     res.status(201).json(menuItem);
@@ -53,6 +54,12 @@ exports.updateMenuItem = async (req, res) => {
     }
 
     Object.assign(menuItem, req.body);
+    
+    // اگر موجودی دستی ۰ شد، غیرفعالش کن
+    if (menuItem.stock === 0) {
+      menuItem.isAvailable = false;
+    }
+
     const updatedItem = await menuItem.save();
 
     res.json(updatedItem);
@@ -84,6 +91,53 @@ exports.updateMenuPrice = async (req, res) => {
     res.json({ message: 'قیمت با موفقیت بروزرسانی شد', item: updatedItem });
   } catch (error) {
     res.status(500).json({ message: 'خطا در بروزرسانی قیمت', error: error.message });
+  }
+};
+
+// @desc    ویرایش تعداد موجودی آیتم (مخصوص ادمین)
+// @route   PATCH /api/menu/:id/stock
+// @access  Private/Admin
+exports.updateStock = async (req, res) => {
+  try {
+    const { stock } = req.body;
+
+    if (stock === undefined || stock < 0) {
+      return res.status(400).json({ message: 'تعداد موجودی معتبر نیست' });
+    }
+
+    const menuItem = await MenuItem.findById(req.params.id);
+
+    if (!menuItem) {
+      return res.status(404).json({ message: 'آیتم یافت نشد' });
+    }
+
+    menuItem.stock = Number(stock);
+    menuItem.isAvailable = menuItem.stock > 0;
+    const updatedItem = await menuItem.save();
+
+    res.json({ message: 'موجودی با موفقیت بروزرسانی شد', item: updatedItem });
+  } catch (error) {
+    res.status(500).json({ message: 'خطا در بروزرسانی موجودی', error: error.message });
+  }
+};
+
+// @desc    تغییر وضعیت فعال/غیرفعال بودن آیتم (مخصوص ادمین)
+// @route   PATCH /api/menu/:id/availability
+// @access  Private/Admin
+exports.toggleAvailability = async (req, res) => {
+  try {
+    const menuItem = await MenuItem.findById(req.params.id);
+
+    if (!menuItem) {
+      return res.status(404).json({ message: 'آیتم یافت نشد' });
+    }
+
+    menuItem.isAvailable = req.body.isAvailable !== undefined ? req.body.isAvailable : !menuItem.isAvailable;
+    const updatedItem = await menuItem.save();
+
+    res.json({ message: 'وضعیت فعال بودن تغییر کرد', item: updatedItem });
+  } catch (error) {
+    res.status(500).json({ message: 'خطا در تغییر وضعیت موجودی', error: error.message });
   }
 };
 

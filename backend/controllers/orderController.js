@@ -1,7 +1,7 @@
 const Order = require('../models/Order');
 const MenuItem = require('../models/MenuItem');
 
-// @desc    ثبت سفارش جدید توسط مشتری
+// @desc    ثبت سفارش جدید توسط مشتری (به همراه کسر خودکار موجودی)
 // @route   POST /api/orders
 // @access  Private (Customer)
 exports.createOrder = async (req, res) => {
@@ -14,14 +14,18 @@ exports.createOrder = async (req, res) => {
 
     let totalPrice = 0;
     const orderItems = [];
+    const itemsToUpdate = [];
 
+    // ۱. بررسی موجودی تمامی آیتم‌ها
     for (const item of items) {
       const menuItem = await MenuItem.findById(item.menuItem);
       if (!menuItem) {
         return res.status(404).json({ message: `آیتم با شناسه ${item.menuItem} یافت نشد` });
       }
-      if (!menuItem.isAvailable) {
-        return res.status(400).json({ message: `آیتم ${menuItem.name} در حال حاضر موجود نیست` });
+      if (!menuItem.isAvailable || menuItem.stock < item.quantity) {
+        return res.status(400).json({ 
+          message: `موجودی آیتم "${menuItem.name}" کافی نیست (موجودی فعلی: ${menuItem.stock})` 
+        });
       }
 
       totalPrice += menuItem.price * item.quantity;
@@ -30,8 +34,24 @@ exports.createOrder = async (req, res) => {
         quantity: item.quantity,
         priceAtOrder: menuItem.price
       });
+
+      itemsToUpdate.push({
+        model: menuItem,
+        quantity: item.quantity
+      });
     }
 
+    // ۲. کسر خودکار موجودی از دیتابیس
+    for (const itemObj of itemsToUpdate) {
+      itemObj.model.stock -= itemObj.quantity;
+      if (itemObj.model.stock <= 0) {
+        itemObj.model.stock = 0;
+        itemObj.model.isAvailable = false;
+      }
+      await itemObj.model.save();
+    }
+
+    // ۳. ایجاد سفارش
     const order = await Order.create({
       customer: req.user._id,
       items: orderItems,

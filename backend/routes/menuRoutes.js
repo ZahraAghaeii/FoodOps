@@ -5,6 +5,8 @@ const {
   createMenuItem,
   updateMenuItem,
   updateMenuPrice,
+  updateStock,
+  toggleAvailability,
   deleteMenuItem
 } = require('../controllers/menuController');
 const { protect, authorize } = require('../middleware/authMiddleware');
@@ -14,10 +16,18 @@ router
   .get(getMenuItems)
   .post(protect, authorize('Admin'), createMenuItem);
 
-// مسیر اختصاصی برای ویرایش سریع قیمت توسط ادمین
+// مسیرهای اختصاصی ادمین برای مدیریت قیمت و موجودی
 router
   .route('/:id/price')
   .patch(protect, authorize('Admin'), updateMenuPrice);
+
+router
+  .route('/:id/stock')
+  .patch(protect, authorize('Admin'), updateStock);
+
+router
+  .route('/:id/availability')
+  .patch(protect, authorize('Admin'), toggleAvailability);
 
 router
   .route('/:id')
