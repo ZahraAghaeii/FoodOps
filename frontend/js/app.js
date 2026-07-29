@@ -22,21 +22,40 @@ window.onload = () => {
   // افزودن دکمه‌های مدیریتی براساس نقش کاربر
   renderKitchenButton(user);
   renderDeliveryButton(user);
+  renderAdminAddMenuForm(user); // مدیریت نمایش فرم افزودن غذای جدید
 
   fetchMenu();
   fetchCategories();
 };
 
+// نمایش یا مخفی‌سازی فرم افزودن غذای جدید (فقط برای ادمین)
+function renderAdminAddMenuForm(user) {
+  if (!user) return;
 
+  const userRole = String(user.role || user.type || '').toLowerCase().trim();
+  const isAdmin = userRole.includes('admin');
+
+  // پیدا کردن فرم ثبت غذا یا کانتینر اصلی آن
+  const addMenuForm = document.getElementById('add-menu-form');
+  const addMenuSection = addMenuForm ? addMenuForm.closest('.card') || addMenuForm.parentElement : null;
+
+  const elementToToggle = addMenuSection || addMenuForm;
+
+  if (elementToToggle) {
+    if (isAdmin) {
+      elementToToggle.style.display = 'block';
+    } else {
+      elementToToggle.style.display = 'none';
+    }
+  }
+}
 
 // نمایش مشروط دکمه صف آشپزخانه برای نقش‌های مجاز
 function renderKitchenButton(user) {
   if (!user) return;
-  console.log('hello')
-  // استخراج نقش کاربر
+
   const userRole = String(user.role || user.type || '').toLowerCase().trim();
-  console.log(userRole);
-  // پشتیبانی از kitchen، staff، admin و ترکیبات آن‌ها مثل "kitchen staff"
+
   const isAllowed = userRole.includes('kitchen') || 
                     userRole.includes('staff') || 
                     userRole.includes('admin') || 
@@ -78,7 +97,6 @@ function renderDeliveryButton(user) {
 
   const userRole = String(user.role || user.type || '').toLowerCase().trim();
 
-  // فقط صندوق‌دار و ادمین
   const isAllowed = userRole.includes('cashier') || 
                     userRole.includes('admin') || 
                     userRole.includes('delivery');
@@ -212,20 +230,18 @@ async function fetchMenu() {
     }
   }
 }
+
 document.addEventListener("DOMContentLoaded", () => {
-    // دریافت اطلاعات کاربر ذخیره شده در سیستم (هنگام لاگین)
     const userStr = localStorage.getItem("user");
     const cartNavItem = document.getElementById("cart-nav-item");
 
     if (userStr && cartNavItem) {
         const user = JSON.parse(userStr);
-        
-        // بررسی نقش کاربر
-        if (user.role === "Customer") {
-            // اگر مشتری بود، سبد خرید نمایش داده شود
+        const userRole = String(user.role || user.type || '').toLowerCase().trim();
+
+        if (userRole === "customer") {
             cartNavItem.style.display = "block"; 
         } else {
-            // برای ادمین، آشپزخانه و صندوق‌دار مخفی بماند
             cartNavItem.style.display = "none"; 
         }
     }
