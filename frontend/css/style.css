@@ -6,7 +6,7 @@
 }
 
 body {
-  background-color: #f8f9fa;
+  background-color: #fff9f5; /* تم نارنجی ملایم و گرم */
   color: #333;
   direction: rtl;
 }
@@ -14,10 +14,43 @@ body {
 header {
   background-color: #2c3e50;
   color: #fff;
-  padding: 1rem 2rem;
+  padding: 10px 25px !important;
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+header h1 {
+  font-size: 18px !important;
+}
+
+/* ========================================== */
+/*            Hero Banner & Overlay           */
+/* ========================================== */
+
+.hero-banner {
+  position: relative;
+  width: 100%;
+  height: 260px;
+  background-image: url('../images/pic.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.15) 0%,
+    rgba(255, 249, 245, 0.6) 75%,
+    #fff9f5 100%
+  );
 }
 
 nav a {
@@ -35,6 +68,8 @@ nav a:hover {
   max-width: 1200px;
   margin: 20px auto;
   padding: 0 15px;
+  position: relative;
+  z-index: 1;
 }
 
 .auth-card {
@@ -117,7 +152,6 @@ button:hover {
 /* ========================================== */
 /*           Kitchen Dashboard Styles         */
 /* ========================================== */
-
 
 .kitchen-header {
   display: flex;
@@ -231,20 +265,9 @@ button:hover {
   background-color: #219150;
 }
 
-
-
 /* ========================================== */
 /*         Main Index & Order Page Styles     */
 /* ========================================== */
-
-/* اصلاح اندازه و ارتفاع هدر */
-header {
-  padding: 10px 25px !important;
-}
-
-header h1 {
-  font-size: 18px !important;
-}
 
 .header-right { 
   display: flex; 
@@ -260,7 +283,7 @@ header h1 {
 }
 
 .btn-logout { 
-  width: auto !important; /* جلوگیری از ۱۰۰٪ شدن عرض دکمه خروج */
+  width: auto !important;
   background: #e74c3c; 
   color: white; 
   border: none; 
@@ -275,7 +298,6 @@ header h1 {
   background: #c0392b; 
 }
 
-/* استایل دکمه سبد خرید در Navbar */
 .navbar { 
   list-style: none; 
   display: flex; 
@@ -355,7 +377,7 @@ header h1 {
 }
 
 .btn-submit-food, .btn-submit-cat { 
-  width: auto !important; /* خنثی‌سازی width:100% کلی */
+  width: auto !important; 
   background: #8e44ad; 
   color: white; 
   border: none; 
@@ -369,17 +391,16 @@ header h1 {
   background: #732d91; 
 }
 
-/* اصلاح دکمه‌های فیلتر دسته‌بندی (افقی و کوچک کنار هم) */
 .category-filter-bar { 
   display: flex; 
-  flex-direction: row; /* چیدمان افقی */
+  flex-direction: row; 
   gap: 8px; 
   margin: 12px 0 18px 0; 
   flex-wrap: wrap; 
 }
 
 .filter-btn { 
-  width: auto !important; /* جلوگیری از کشیده شدن عرضی */
+  width: auto !important; 
   display: inline-block;
   background: #e2e8f0; 
   color: #475569; 
