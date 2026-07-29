@@ -60,14 +60,14 @@ function renderKitchenOrders(orders) {
       `<li>${i.menuItem ? i.menuItem.name : 'آیتم حذف شده'} × ${i.quantity}</li>`
     ).join('');
 
-    // ساخت دکمه مدیریت وضعیت بر اساس وضعیت فعلی
+    // ساخت دکمه مدیریت وضعیت (محدود به آشپزخانه: فقط شروع و آماده تحویل)
     let actionButton = '';
     if (order.status === 'Pending') {
       actionButton = `<button style="background: #2196F3; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; width: 100%; font-family: inherit; font-weight: bold;" onclick="updateOrderStatus('${order._id}', 'start')">شروع آماده‌سازی</button>`;
     } else if (order.status === 'Preparing') {
       actionButton = `<button style="background: #2ecc71; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; width: 100%; font-family: inherit; font-weight: bold;" onclick="updateOrderStatus('${order._id}', 'ready')">آماده تحویل</button>`;
     } else if (order.status === 'Ready') {
-      actionButton = `<button style="background: #9b59b6; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; width: 100%; font-family: inherit; font-weight: bold;" onclick="updateOrderStatus('${order._id}', 'deliver')">تحویل داده شد</button>`;
+      actionButton = `<div style="background: #f1f2f6; color: #2c3e50; padding: 8px 12px; border-radius: 4px; text-align: center; font-weight: bold; font-size: 13px; border: 1px dashed #bdc3c7;">⏳ در انتظار تحویل توسط صندوق‌دار</div>`;
     }
 
     const customerName = order.customer ? order.customer.name : 'مشتری';
@@ -87,25 +87,15 @@ function renderKitchenOrders(orders) {
 // ارسال درخواست تغییر وضعیت به بک‌اند
 async function updateOrderStatus(orderId, action) {
   const token = localStorage.getItem('token');
-  
-  let endpoint = `${API_ORDERS}/${orderId}/${action}`;
-  let method = 'PATCH';
-  let bodyData = null;
-
-  // اگر مرحله تحویل نهایی باشد، از روت status استفاده می‌شود
-  if (action === 'deliver') {
-    endpoint = `${API_ORDERS}/${orderId}/status`;
-    bodyData = JSON.stringify({ status: 'Delivered' });
-  }
+  const endpoint = `${API_ORDERS}/${orderId}/${action}`;
 
   try {
     const res = await fetch(endpoint, {
-      method: method,
+      method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
-      },
-      body: bodyData
+      }
     });
 
     const data = await res.json();

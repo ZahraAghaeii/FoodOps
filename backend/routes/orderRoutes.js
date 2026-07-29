@@ -9,7 +9,7 @@ const {
   deliverOrder,
   updateOrderStatus
 } = require('../controllers/orderController');
-const { protect } = require('../middleware/authMiddleware');
+const { protect, authorize } = require('../middleware/authMiddleware');
 
 // تمامی روت‌ها نیازمند احراز هویت هستند
 router.use(protect);
@@ -21,11 +21,13 @@ router.post('/', createOrder);
 router.get('/me', getMyOrders);
 router.get('/my-orders', getMyOrders);
 
-// روت‌های صف آشپزخانه و تحویل سفارش
-router.get('/kitchen', getKitchenOrders);
-router.patch('/:id/start', startOrder);
-router.patch('/:id/ready', readyOrder);
-router.patch('/:id/deliver', deliverOrder);
-router.patch('/:id/status', updateOrderStatus);
+// روت‌های صف آشپزخانه
+router.get('/kitchen', authorize('Kitchen', 'Admin', 'Cashier'), getKitchenOrders);
+router.patch('/:id/start', authorize('Kitchen', 'Admin'), startOrder);
+router.patch('/:id/ready', authorize('Kitchen', 'Admin'), readyOrder);
+
+// روت‌های تحویل سفارش (فقط مخصوص صندوق‌دار و ادمین)
+router.patch('/:id/deliver', authorize('Cashier', 'Admin'), deliverOrder);
+router.patch('/:id/status', authorize('Cashier', 'Admin'), updateOrderStatus);
 
 module.exports = router;
