@@ -218,6 +218,11 @@ function renderMenuGrid(items) {
     return;
   }
 
+  // بررسی نقش ادمین برای نمایش دکمه ویرایش قیمت
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const userRole = String(user.role || user.type || '').toLowerCase().trim();
+  const isAdmin = userRole.includes('admin');
+
   items.forEach(item => {
     if (!item.isAvailable) return;
 
@@ -236,12 +241,56 @@ function renderMenuGrid(items) {
         <p>${item.description || 'بدون توضیح'}</p>
       </div>
       <div>
-        <div class="food-price">${Number(item.price).toLocaleString('fa-IR')} تومان</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <div class="food-price">${Number(item.price).toLocaleString('fa-IR')} تومان</div>
+          ${isAdmin ? `
+            <button onclick="editPrice('${item._id}', ${item.price})" style="background: #f39c12; color: white; border: none; padding: 3px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; transition: 0.2s;">
+              ✏️ ویرایش قیمت
+            </button>
+          ` : ''}
+        </div>
         <button class="btn-add" onclick="addToCart('${item._id}', '${item.name}', ${item.price})">افزودن به سبد</button>
       </div>
     `;
     menuGrid.appendChild(card);
   });
+}
+
+// تابع ویرایش قیمت غذای انتخاب‌شده (مخصوص ادمین)
+async function editPrice(itemId, currentPrice) {
+  const newPrice = prompt('قیمت جدید را به تومان وارد کنید:', currentPrice);
+
+  if (newPrice === null || newPrice.trim() === '') return;
+
+  const priceNum = Number(newPrice);
+  if (isNaN(priceNum) || priceNum < 0) {
+    alert('لطفاً یک عدد معتبر وارد کنید.');
+    return;
+  }
+
+  const token = localStorage.getItem('token');
+  try {
+    const res = await fetch(`${API_MENU}/${itemId}/price`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ price: priceNum })
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      alert('قیمت با موفقیت تغییر کرد! 🎉');
+      fetchMenu(); // بروزرسانی منو
+    } else {
+      alert(data.message || 'خطا در ویرایش قیمت');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('ارتباط با سرور برقرار نشد.');
+  }
 }
 
 // فیلتر کردن غذاها بر اساس دسته‌بندی انتخاب‌شده

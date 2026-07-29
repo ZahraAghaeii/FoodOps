@@ -41,7 +41,7 @@ exports.createMenuItem = async (req, res) => {
   }
 };
 
-// @desc    ویرایش آیتم منو
+// @desc    ویرایش کامل آیتم منو
 // @route   PUT /api/menu/:id
 // @access  Private/Admin
 exports.updateMenuItem = async (req, res) => {
@@ -58,6 +58,32 @@ exports.updateMenuItem = async (req, res) => {
     res.json(updatedItem);
   } catch (error) {
     res.status(500).json({ message: 'خطا در ویرایش آیتم', error: error.message });
+  }
+};
+
+// @desc    ویرایش قیمت آیتم منو (مخصوص ادمین)
+// @route   PATCH /api/menu/:id/price
+// @access  Private/Admin
+exports.updateMenuPrice = async (req, res) => {
+  try {
+    const { price } = req.body;
+
+    if (price === undefined || price === null || price < 0) {
+      return res.status(400).json({ message: 'قیمت وارد شده معتبر نیست.' });
+    }
+
+    const menuItem = await MenuItem.findById(req.params.id);
+
+    if (!menuItem) {
+      return res.status(404).json({ message: 'آیتم یافت نشد' });
+    }
+
+    menuItem.price = Number(price);
+    const updatedItem = await menuItem.save();
+
+    res.json({ message: 'قیمت با موفقیت بروزرسانی شد', item: updatedItem });
+  } catch (error) {
+    res.status(500).json({ message: 'خطا در بروزرسانی قیمت', error: error.message });
   }
 };
 

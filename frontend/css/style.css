@@ -534,3 +534,26 @@ header h1 {
 .btn-checkout:hover { 
   background: #1f6391; 
 }
+
+.price-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.btn-edit-price {
+  width: auto !important;
+  background: #f39c12;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-edit-price:hover {
+  background: #d35400;
+}
