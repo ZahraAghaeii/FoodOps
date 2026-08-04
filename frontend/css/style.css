@@ -425,9 +425,7 @@ button:hover {
 }
 
 /* کارت‌های منوی غذاها */
-.menu-section { 
-  flex: 3; 
-}
+.menu-section { width: 100%; flex: 1; }
 
 .food-card { 
   background: white; 
