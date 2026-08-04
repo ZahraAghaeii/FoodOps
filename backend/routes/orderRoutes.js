@@ -7,7 +7,11 @@ const {
   startOrder,
   readyOrder,
   deliverOrder,
-  updateOrderStatus
+  updateOrderStatus,
+  addToCart,
+  removeFromCart,
+  getCart,
+  checkoutCart
 } = require('../controllers/orderController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
@@ -29,5 +33,11 @@ router.patch('/:id/ready', authorize('Kitchen', 'Admin'), readyOrder);
 // روت‌های تحویل سفارش (فقط مخصوص صندوق‌دار و ادمین)
 router.patch('/:id/deliver', authorize('Cashier', 'Admin'), deliverOrder);
 router.patch('/:id/status', authorize('Cashier', 'Admin'), updateOrderStatus);
+
+// مسیرهای جدید سبد خرید (مخصوص مشتری)
+router.post('/cart/add', authorize('Customer'), addToCart);
+router.post('/cart/remove', authorize('Customer'), removeFromCart);
+router.get('/cart', authorize('Customer'), getCart);
+router.post('/checkout', authorize('Customer'), checkoutCart);
 
 module.exports = router;
