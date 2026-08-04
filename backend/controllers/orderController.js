@@ -183,3 +183,109 @@ exports.updateOrderStatus = async (req, res) => {
     res.status(500).json({ message: 'خطا در تغییر وضعیت سفارش', error: error.message });
   }
 };
+
+exports.addToCart = async (req, res) => {
+    try {
+        const { itemId, quantity = 1 } = req.body;
+        const item = await MenuItem.findById(itemId);
+
+        if (!item || item.stock < quantity) {
+            return res.status(400).json({ message: 'موجودی کافی نیست یا آیتم یافت نشد.' });
+        }
+
+        // کسر موجودی از دیتابیس
+        item.stock -= quantity;
+        await item.save();
+
+        // پیدا کردن سفارشی که هنوز Pending است (سبد خرید)
+        let cart = await Order.findOne({ customer: req.user._id, status: 'Pending' });
+
+        if (!cart) {
+            cart = new Order({ customer: req.user._id, items: [], status: 'Pending', totalPrice: 0 });
+        }
+
+        const existingItemIndex = cart.items.findIndex(i => i.menuItem.toString() === itemId);
+        if (existingItemIndex > -1) {
+            cart.items[existingItemIndex].quantity += quantity;
+        } else {
+            cart.items.push({ menuItem: itemId, quantity, priceAtOrder: item.price });
+        }
+
+        cart.totalPrice += item.price * quantity;
+        await cart.save();
+
+        const totalItemsCount = cart.items.reduce((acc, curr) => acc + curr.quantity, 0);
+
+        res.status(200).json({ message: 'به سبد خرید اضافه شد', totalItemsCount });
+    } catch (error) {
+        res.status(500).json({ message: 'خطای سرور', error: error.message });
+    }
+};
+
+// حذف از سبد و بازگشت موجودی
+exports.removeFromCart = async (req, res) => {
+    try {
+        const { itemId } = req.body;
+        let cart = await Order.findOne({ customer: req.user._id, status: 'Pending' });
+
+        if (!cart) return res.status(404).json({ message: 'سبد خریدی یافت نشد.' });
+
+        const itemIndex = cart.items.findIndex(i => i.menuItem.toString() === itemId);
+        if (itemIndex > -1) {
+            const removedQuantity = cart.items[itemIndex].quantity;
+            
+            const menuItem = await MenuItem.findById(itemId);
+            if (menuItem) {
+                menuItem.stock += removedQuantity;
+                await menuItem.save();
+            }
+
+            cart.totalPrice -= cart.items[itemIndex].priceAtOrder * removedQuantity;
+            cart.items.splice(itemIndex, 1);
+            await cart.save();
+
+            const totalItemsCount = cart.items.reduce((acc, curr) => acc + curr.quantity, 0);
+            res.status(200).json({ message: 'آیتم حذف شد و موجودی برگشت', totalItemsCount });
+        } else {
+            res.status(404).json({ message: 'آیتم در سبد شما نیست.' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'خطای سرور' });
+    }
+};
+
+// دریافت سبد خرید فعلی
+exports.getCart = async (req, res) => {
+    try {
+        const cart = await Order.findOne({ customer: req.user._id, status: 'Pending' })
+            .populate('items.menuItem', 'name price');
+            
+        if (!cart) {
+            return res.status(200).json({ items: [], totalPrice: 0 });
+        }
+        
+        res.status(200).json(cart);
+    } catch (error) {
+        res.status(500).json({ message: 'خطا در دریافت سبد خرید', error: error.message });
+    }
+};
+
+// نهایی سازی سبد خرید و ارسال به آشپزخانه
+exports.checkoutCart = async (req, res) => {
+    try {
+        // پیدا کردن سبد خرید (سفارش Pending) کاربر
+        const cart = await Order.findOne({ customer: req.user._id, status: 'Pending' });
+
+        if (!cart || cart.items.length === 0) {
+            return res.status(400).json({ message: 'سبد خرید شما خالی است.' });
+        }
+
+        // تغییر وضعیت برای ورود به صف آشپزخانه
+        cart.status = 'Preparing'; 
+        await cart.save();
+
+        res.status(200).json({ message: 'سفارش با موفقیت ثبت شد و در حال آماده‌سازی است.' });
+    } catch (error) {
+        res.status(500).json({ message: 'خطا در ثبت نهایی سفارش', error: error.message });
+    }
+};

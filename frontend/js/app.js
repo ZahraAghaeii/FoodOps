@@ -2,7 +2,6 @@ const API_MENU = 'http://localhost:5000/api/menu';
 const API_ORDERS = 'http://localhost:5000/api/orders';
 const API_CATEGORIES = 'http://localhost:5000/api/categories';
 
-let cart = [];
 let allMenuItems = []; // ذخیره تمام غذاها جهت فیلتر فرانت‌اند
 
 // چک کردن وضعیت لاگین و فراخوانی منو و دسته‌بندی‌ها هنگام بارگذاری صفحه
@@ -27,6 +26,7 @@ window.onload = () => {
 
   fetchMenu();
   fetchCategories();
+  fetchCartCount();
 };
 
 // کنترل نمایش بخش‌های مدیریت (فقط برای ادمین)
@@ -253,7 +253,7 @@ function renderMenuGrid(items) {
     // دکمه ثبت/افزودن به سبد
     const actionButton = isOutOfStock
       ? `<button class="btn-add" disabled style="background: #e74c3c; cursor: not-allowed; opacity: 0.8;">❌ ناموجود</button>`
-      : `<button class="btn-add" onclick="addToCart('${item._id}', '${item.name}', ${item.price}, ${stockCount})">افزودن به سبد</button>`;
+      : `<button class="btn-add" onclick="addToCart('${item._id}')">افزودن به سبد</button>`;
 
     card.innerHTML = `
       <div>
@@ -534,104 +534,73 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// افزودن آیتم به سبد خرید (چک کردن سقف موجودی در فرانت)
-function addToCart(id, name, price, maxStock) {
-  const existing = cart.find(i => i.menuItem === id);
-  if (existing) {
-    if (existing.quantity >= maxStock) {
-      alert(`تعداد درخواستی نمی‌تواند بیشتر از موجودی انبار (${maxStock} عدد) باشد.`);
-      return;
+// افزودن به سبد خرید (متصل به بک‌اند)
+async function addToCart(itemId) {
+    const token = localStorage.getItem('token'); 
+    if (!token) return alert('لطفا ابتدا وارد سایت شوید.');
+
+    try {
+        // آدرس به صورت کامل با متغیر API_ORDERS جایگزین شد 👇
+        const response = await fetch(`${API_ORDERS}/cart/add`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ itemId: itemId, quantity: 1 })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            const cartCountElement = document.getElementById('cart-count');
+            if (cartCountElement) {
+                cartCountElement.innerText = data.totalItemsCount;
+            }
+            alert('با موفقیت به سبد خرید اضافه شد.');
+            fetchMenu();
+        } else {
+            alert(data.message || 'موجودی این غذا تمام شده است.');
+        }
+    } catch (error) {
+        console.error('Error adding to cart:', error);
+        alert('ارتباط با سرور برقرار نشد!');
     }
-    existing.quantity += 1;
-  } else {
-    cart.push({ menuItem: id, name, priceAtOrder: price, quantity: 1, maxStock });
-  }
-  renderCart();
 }
 
-// حذف یا کاهش تعداد آیتم از سبد خرید
-function removeFromCart(id) {
-  const index = cart.findIndex(i => i.menuItem === id);
-  if (index !== -1) {
-    if (cart[index].quantity > 1) {
-      cart[index].quantity -= 1;
-    } else {
-      cart.splice(index, 1);
+// دریافت تعداد آیتم‌های سبد خرید از سرور هنگام لود صفحه
+async function fetchCartCount() {
+    const token = localStorage.getItem('token');
+    const userStr = localStorage.getItem('user');
+    
+    if (!token || !userStr) return;
+
+    const user = JSON.parse(userStr);
+    const userRole = String(user.role || user.type || '').toLowerCase().trim();
+
+    // فقط برای مشتریان سبد خرید را چک کن
+    if (userRole !== 'customer') return;
+
+    try {
+        const response = await fetch(`${API_ORDERS}/cart`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (response.ok) {
+            const cart = await response.json();
+            const cartCountElement = document.getElementById('cart-count');
+            
+            if (cartCountElement && cart.items) {
+                // محاسبه مجموع تعداد آیتم‌های درون سبد
+                const totalItemsCount = cart.items.reduce((acc, curr) => acc + curr.quantity, 0);
+                cartCountElement.innerText = totalItemsCount;
+            }
+        }
+    } catch (error) {
+        console.error('خطا در دریافت موجودی سبد خرید:', error);
     }
-  }
-  renderCart();
-}
-
-// بروزرسانی بخش سبد خرید در HTML
-function renderCart() {
-  const cartContainer = document.getElementById('cartItems');
-  if (!cartContainer) return;
-
-  cartContainer.innerHTML = '';
-
-  if (cart.length === 0) {
-    cartContainer.innerHTML = '<p style="font-size: 13px; color: #888;">سبد خرید شما خالی است.</p>';
-    document.getElementById('totalPrice').innerText = '۰ تومان';
-    const cartCount = document.getElementById('cart-count');
-    if (cartCount) cartCount.innerText = '0';
-    return;
-  }
-
-  let total = 0;
-  let totalCount = 0;
-  cart.forEach(item => {
-    total += item.priceAtOrder * item.quantity;
-    totalCount += item.quantity;
-    const li = document.createElement('li');
-    li.className = 'cart-item';
-    li.innerHTML = `
-      <span class="cart-item-title">${item.name}</span>
-      <span class="cart-item-qty">x${item.quantity}</span>
-      <span>${(item.priceAtOrder * item.quantity).toLocaleString('fa-IR')}</span>
-      <button class="btn-remove" onclick="removeFromCart('${item.menuItem}')">✕</button>
-    `;
-    cartContainer.appendChild(li);
-  });
-
-  document.getElementById('totalPrice').innerText = `${total.toLocaleString('fa-IR')} تومان`;
-  const cartCount = document.getElementById('cart-count');
-  if (cartCount) cartCount.innerText = totalCount;
-}
-
-// ثبت نهایی سفارش در بک‌اند
-async function submitOrder() {
-  if (cart.length === 0) {
-    alert('سبد خرید شما خالی است!');
-    return;
-  }
-
-  const token = localStorage.getItem('token');
-  const itemsPayload = cart.map(i => ({
-    menuItem: i.menuItem,
-    quantity: i.quantity
-  }));
-
-  try {
-    const res = await fetch(API_ORDERS, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ items: itemsPayload })
-    });
-
-    const data = await res.json();
-
-    if (res.ok) {
-      alert('سفارش شما با موفقیت ثبت شد و به آشپزخانه ارسال شد! 🎉');
-      cart = [];
-      renderCart();
-      fetchMenu(); // به‌روزرسانی لحظه‌ای موجودی منو پس از ثبت سفارش
-    } else {
-      alert(data.message || 'خطا در ثبت سفارش');
-    }
-  } catch (err) {
-    alert('خطا در ارتباط با سرور');
-  }
 }
