@@ -25,10 +25,22 @@ router.post('/', createOrder);
 router.get('/me', getMyOrders);
 router.get('/my-orders', getMyOrders);
 
-// روت‌های صف آشپزخانه
-router.get('/kitchen', authorize('Kitchen', 'Admin', 'Cashier'), getKitchenOrders);
-router.patch('/:id/start', authorize('Kitchen', 'Admin'), startOrder);
-router.patch('/:id/ready', authorize('Kitchen', 'Admin'), readyOrder);
+// روت‌های صف آشپزخانه (شامل تمام عناوین شغلی آشپزخانه)
+router.get(
+  '/kitchen',
+  authorize('Kitchen Staff', 'Kitchen', 'Cook', 'Chef', 'Admin', 'Cashier'),
+  getKitchenOrders
+);
+router.patch(
+  '/:id/start',
+  authorize('Kitchen Staff', 'Kitchen', 'Cook', 'Chef', 'Admin'),
+  startOrder
+);
+router.patch(
+  '/:id/ready',
+  authorize('Kitchen Staff', 'Kitchen', 'Cook', 'Chef', 'Admin'),
+  readyOrder
+);
 
 // روت‌های تحویل سفارش (فقط مخصوص صندوق‌دار و ادمین)
 router.patch('/:id/deliver', authorize('Cashier', 'Admin'), deliverOrder);

@@ -86,6 +86,18 @@ exports.getMyOrders = async (req, res) => {
 // @access  Private (Kitchen Staff / Admin)
 exports.getKitchenOrders = async (req, res) => {
   try {
+    const role = String(req.user.role || req.user.type || '').toLowerCase().trim();
+    const isKitchenAllowed = 
+      role.includes('kitchen') || 
+      role.includes('staff') || 
+      role.includes('cook') || 
+      role.includes('chef') || 
+      role.includes('admin');
+
+    if (!isKitchenAllowed) {
+      return res.status(403).json({ message: 'شما دسترسی لازم برای مشاهده داشبورد آشپزخانه را ندارید.' });
+    }
+
     const orders = await Order.find({ status: { $ne: 'Delivered' } })
       .populate('customer', 'name email')
       .populate('items.menuItem', 'name price')
