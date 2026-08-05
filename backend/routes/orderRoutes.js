@@ -11,7 +11,10 @@ const {
   addToCart,
   removeFromCart,
   getCart,
-  checkoutCart
+  checkoutCart,
+  cancelOrderCustomer,
+  getSalesReports,
+  getAllOrders
 } = require('../controllers/orderController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
@@ -51,5 +54,8 @@ router.post('/cart/add', authorize('Customer'), addToCart);
 router.post('/cart/remove', authorize('Customer'), removeFromCart);
 router.get('/cart', authorize('Customer'), getCart);
 router.post('/checkout', authorize('Customer'), checkoutCart);
+router.post('/:id/cancel', authorize('Customer'), cancelOrderCustomer);
+router.get('/reports', authorize('Admin'), getSalesReports);
+router.get('/all', authorize('Admin'), getAllOrders);
 
 module.exports = router;

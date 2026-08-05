@@ -98,7 +98,7 @@ function renderKitchenOrders(orders) {
       actionButton = `<button style="background: #2ecc71; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; width: 100%; font-family: inherit; font-weight: bold;" onclick="updateOrderStatus('${order._id}', 'ready')">آماده تحویل</button>`;
     } else if (status === 'ready') {
       actionButton = `<div style="background: #f1f2f6; color: #2c3e50; padding: 8px 12px; border-radius: 4px; text-align: center; font-weight: bold; font-size: 13px; border: 1px dashed #bdc3c7;">⏳ در انتظار تحویل توسط صندوق‌دار</div>`;
-    }
+    } else return
 
     const customerName = order.customer ? order.customer.name : (order.user ? order.user.name : 'مشتری');
 

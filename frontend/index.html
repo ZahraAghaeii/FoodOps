@@ -33,6 +33,36 @@
   </div>
 
   <div class="container">
+  
+    <!-- بخش گزارشات فروش ادمین -->
+    <div class="admin-section" id="adminReportsSection">
+        <h2>📊 گزارشات فروش سیستم</h2>
+        <div style="display: flex; gap: 15px; margin-top: 15px; flex-wrap: wrap;">
+            
+            <!-- کارت فروش روزانه -->
+            <div style="flex: 1; background: #fdfefe; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; text-align: center; border-top: 4px solid #3498db; min-width: 200px;">
+                <h3 style="color: #2c3e50; font-size: 15px; margin-bottom: 10px;">امروز (۲۴ ساعت اخیر)</h3>
+                <p style="font-size: 22px; font-weight: bold; color: #27ae60;" id="dailySales">۰ تومان</p>
+                <p style="font-size: 13px; color: #7f8c8d; margin-top: 5px;" id="dailyCount">تعداد سفارش: ۰</p>
+            </div>
+
+            <!-- کارت فروش هفتگی -->
+            <div style="flex: 1; background: #fdfefe; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; text-align: center; border-top: 4px solid #f39c12; min-width: 200px;">
+                <h3 style="color: #2c3e50; font-size: 15px; margin-bottom: 10px;">هفتگی (۷ روز اخیر)</h3>
+                <p style="font-size: 22px; font-weight: bold; color: #27ae60;" id="weeklySales">۰ تومان</p>
+                <p style="font-size: 13px; color: #7f8c8d; margin-top: 5px;" id="weeklyCount">تعداد سفارش: ۰</p>
+            </div>
+
+            <!-- کارت فروش ماهانه -->
+            <div style="flex: 1; background: #fdfefe; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; text-align: center; border-top: 4px solid #9b59b6; min-width: 200px;">
+                <h3 style="color: #2c3e50; font-size: 15px; margin-bottom: 10px;">ماهانه (۳۰ روز اخیر)</h3>
+                <p style="font-size: 22px; font-weight: bold; color: #27ae60;" id="monthlySales">۰ تومان</p>
+                <p style="font-size: 13px; color: #7f8c8d; margin-top: 5px;" id="monthlyCount">تعداد سفارش: ۰</p>
+            </div>
+
+        </div>
+    </div>
+
     <!-- فرم ثبت دسته‌بندی جدید (مخصوص ادمین) -->
     <div id="admin-category-section" class="admin-section">
       <h2>📂 افزودن دسته‌بندی جدید</h2>
@@ -53,7 +83,7 @@
         
         <!-- فیلتر انتخاب فایل از لپ‌تاپ به همراه متن راهنما -->
         <div style="display: flex; flex-direction: column; gap: 4px;">
-          <label style="font-size: 12px; color: #555; font-weight: bold;">انتخاب عکس غذا از لپ‌تاپ:</label>
+          <label style="font-size: 12px; color: #555; font-weight: bold;">انتخاب عکس غذا از لپ‌تاپ Q530VJ:</label>
           <input type="file" id="menu-image-file" accept="image/*" style="padding: 6px; border: 1px solid #ccc; border-radius: 5px; background: #fff;" />
         </div>
 
@@ -76,8 +106,8 @@
           <p>در حال دریافت منو...</p>
         </div>
       </div>
-
     </div>
+    
   </div>
 
   <script src="js/auth.js"></script>

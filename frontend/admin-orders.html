@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodOps - مدیریت کل سفارشات</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .kanban-board {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding-bottom: 20px;
+            align-items: flex-start;
+        }
+        
+        .kanban-column {
+            flex: 1;
+            min-width: 260px;
+            background: #f4f6f9;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .kanban-column h3 {
+            font-size: 15px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+            color: #2c3e50;
+            text-align: center;
+        }
+
+        .admin-order-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-right: 4px solid #ccc;
+            font-size: 13px;
+        }
+
+        /* رنگ‌بندی کارت‌ها بر اساس ستون */
+        .col-pending .admin-order-card { border-right-color: #f39c12; }
+        .col-preparing .admin-order-card { border-right-color: #3498db; }
+        .col-ready .admin-order-card { border-right-color: #f1c40f; }
+        .col-delivered .admin-order-card { border-right-color: #27ae60; }
+        .col-cancelled .admin-order-card { border-right-color: #e74c3c; }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: #7f8c8d;
+            font-size: 11px;
+        }
+        .card-customer {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        .card-items {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
+            color: #555;
+            border-top: 1px dashed #eee;
+            padding-top: 8px;
+        }
+        .card-items li { margin-bottom: 4px; }
+        .card-total {
+            font-weight: bold;
+            color: #27ae60;
+            text-align: left;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1 onclick="window.location.href='index.html'" style="cursor: pointer;">🍽️ سیستم FoodOps (پنل ادمین)</h1>
+        <div class="header-right">
+            <button class="btn-logout" onclick="window.location.href='index.html'" style="background: #34495e;">بازگشت به خانه</button>
+        </div>
+    </header>
+
+    <div class="container" style="max-width: 1400px; margin-top: 30px;">
+        <h2 style="margin-bottom: 20px;">مدیریت جامع سفارشات</h2>
+        
+        <div class="kanban-board">
+            
+            <!-- ستون ثبت شده -->
+            <div class="kanban-column col-pending">
+                <h3>🟠 ثبت شده / در انتظار</h3>
+                <div id="col-Pending"></div>
+            </div>
+
+            <!-- ستون در حال آماده‌سازی -->
+            <div class="kanban-column col-preparing">
+                <h3>🔵 در حال پخت</h3>
+                <div id="col-Preparing"></div>
+            </div>
+
+            <!-- ستون آماده تحویل -->
+            <div class="kanban-column col-ready">
+                <h3>🟡 آماده تحویل</h3>
+                <div id="col-Ready"></div>
+            </div>
+
+            <!-- ستون تحویل داده شده -->
+            <div class="kanban-column col-delivered">
+                <h3>🟢 نهایی و تحویل شده</h3>
+                <div id="col-Delivered"></div>
+            </div>
+
+            <!-- ستون لغو شده -->
+            <div class="kanban-column col-cancelled">
+                <h3>🔴 لغو شده‌ها</h3>
+                <div id="col-Cancelled"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script src="js/admin-orders.js"></script>
+</body>
+</html>

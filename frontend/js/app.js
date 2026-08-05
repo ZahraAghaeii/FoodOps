@@ -22,7 +22,8 @@ window.onload = () => {
   // افزودن دکمه‌های مدیریتی براساس نقش کاربر
   renderKitchenButton(user);
   renderDeliveryButton(user);
-  renderAdminPanels(user); // نمایش/مخفی‌سازی پنل‌های ادمین
+  renderAdminOrdersButton(user); // دکمه جدید برای مدیریت کل سفارشات
+  renderAdminPanels(user); // نمایش/مخفی‌سازی پنل‌های ادمین و فراخوانی گزارشات
 
   fetchMenu();
   fetchCategories();
@@ -38,9 +39,56 @@ function renderAdminPanels(user) {
 
   const catSection = document.getElementById('admin-category-section');
   const menuSection = document.getElementById('admin-menu-section');
+  const reportsSection = document.getElementById('adminReportsSection');
 
   if (catSection) catSection.style.display = isAdmin ? 'block' : 'none';
   if (menuSection) menuSection.style.display = isAdmin ? 'block' : 'none';
+
+  // نمایش دادن باکس گزارشات و دریافت اطلاعات فقط برای ادمین
+  if (reportsSection) {
+    if (isAdmin) {
+      reportsSection.style.display = 'block';
+      fetchAdminReports();
+    } else {
+      reportsSection.style.display = 'none';
+    }
+  }
+}
+
+// نمایش دکمه مدیریت کل سفارشات (فقط برای ادمین)
+function renderAdminOrdersButton(user) {
+  if (!user) return;
+
+  const userRole = String(user.role || user.type || '').toLowerCase().trim();
+  const isAdmin = userRole.includes('admin');
+
+  if (isAdmin) {
+    if (document.getElementById('adminOrdersNavBtn')) return;
+
+    const adminOrdersBtn = document.createElement('a');
+    adminOrdersBtn.id = 'adminOrdersNavBtn';
+    adminOrdersBtn.href = 'admin-orders.html';
+    adminOrdersBtn.innerText = '📋 مدیریت کل سفارشات';
+    adminOrdersBtn.style.cssText = `
+      background-color: #8e44ad;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 13px;
+      margin: 0 5px;
+      display: inline-block;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      transition: background 0.2s;
+      cursor: pointer;
+    `;
+
+    adminOrdersBtn.onmouseover = () => adminOrdersBtn.style.backgroundColor = '#732d91';
+    adminOrdersBtn.onmouseout = () => adminOrdersBtn.style.backgroundColor = '#8e44ad';
+
+    injectHeaderBtn(adminOrdersBtn);
+  }
 }
 
 // نمایش مشروط دکمه صف آشپزخانه برای نقش‌های مجاز
@@ -49,12 +97,12 @@ function renderKitchenButton(user) {
 
   const userRole = String(user.role || user.type || '').toLowerCase().trim();
 
-  const isAllowed = userRole.includes('kitchen') || 
-                    userRole.includes('staff') || 
-                    userRole.includes('admin') || 
-                    userRole.includes('cook') || 
-                    userRole.includes('chef');
-  
+  const isAllowed = userRole.includes('kitchen') ||
+    userRole.includes('staff') ||
+    userRole.includes('admin') ||
+    userRole.includes('cook') ||
+    userRole.includes('chef');
+
   if (isAllowed) {
     if (document.getElementById('kitchenNavBtn')) return;
 
@@ -90,9 +138,9 @@ function renderDeliveryButton(user) {
 
   const userRole = String(user.role || user.type || '').toLowerCase().trim();
 
-  const isAllowed = userRole.includes('cashier') || 
-                    userRole.includes('admin') || 
-                    userRole.includes('delivery');
+  const isAllowed = userRole.includes('cashier') ||
+    userRole.includes('admin') ||
+    userRole.includes('delivery');
 
   if (isAllowed) {
     if (document.getElementById('deliveryNavBtn')) return;
@@ -125,10 +173,10 @@ function renderDeliveryButton(user) {
 
 // تابع کمکی برای تزریق دکمه‌ها در هدر پیش از دکمه خروج/نام کاربر
 function injectHeaderBtn(buttonElem) {
-  const logoutBtn = document.querySelector('button[onclick*="logout"]') || 
-                    document.getElementById('logoutBtn') || 
-                    document.querySelector('.btn-danger') ||
-                    document.querySelector('button');
+  const logoutBtn = document.querySelector('button[onclick*="logout"]') ||
+    document.getElementById('logoutBtn') ||
+    document.querySelector('.btn-danger') ||
+    document.querySelector('button');
 
   const userNameElem = document.getElementById('userName');
 
@@ -178,7 +226,7 @@ async function fetchCategories() {
         const btn = document.createElement('button');
         btn.className = 'filter-btn';
         btn.textContent = cat.name;
-        btn.onclick = function() { filterMenu(cat._id, this); };
+        btn.onclick = function () { filterMenu(cat._id, this); };
         filterBar.appendChild(btn);
       }
     });
@@ -193,7 +241,7 @@ async function fetchMenu() {
   try {
     const res = await fetch(API_MENU);
     allMenuItems = await res.json();
-    
+
     renderMenuGrid(allMenuItems);
   } catch (err) {
     console.error(err);
@@ -225,8 +273,8 @@ function renderMenuGrid(items) {
     const stockCount = item.stock !== undefined ? item.stock : 0;
     const isOutOfStock = !item.isAvailable || stockCount <= 0;
 
-    const categoryName = item.category && item.category.name 
-      ? item.category.name 
+    const categoryName = item.category && item.category.name
+      ? item.category.name
       : 'بدون دسته‌بندی';
 
     const foodImage = (item.imageUrl && item.imageUrl.trim() !== '') ? item.imageUrl : '';
@@ -466,19 +514,19 @@ function filterMenu(categoryId, btnElement) {
 
 // نمایش سبد خرید بر اساس نقش کاربر
 document.addEventListener("DOMContentLoaded", () => {
-    const userStr = localStorage.getItem("user");
-    const cartNavItem = document.getElementById("cart-nav-item");
+  const userStr = localStorage.getItem("user");
+  const cartNavItem = document.getElementById("cart-nav-item");
 
-    if (userStr && cartNavItem) {
-        const user = JSON.parse(userStr);
-        const userRole = String(user.role || user.type || '').toLowerCase().trim();
+  if (userStr && cartNavItem) {
+    const user = JSON.parse(userStr);
+    const userRole = String(user.role || user.type || '').toLowerCase().trim();
 
-        if (userRole === "customer") {
-            cartNavItem.style.display = "block"; 
-        } else {
-            cartNavItem.style.display = "none"; 
-        }
+    if (userRole === "customer") {
+      cartNavItem.style.display = "block";
+    } else {
+      cartNavItem.style.display = "none";
     }
+  }
 });
 
 // Listenerها برای فرم‌های ادمین (خواندن خودکار نام عکس از لپ‌تاپ)
@@ -539,7 +587,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const fileInput = document.getElementById('menu-image-file');
       let imagePath = '';
-      
+
       if (fileInput && fileInput.files && fileInput.files[0]) {
         // نام فایل انتخابی از لپ‌تاپ را می‌خواند و مسیر images/ را به آن اضافه می‌کند
         const fileName = fileInput.files[0].name;
@@ -585,72 +633,107 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // افزودن به سبد خرید با در نظر گرفتن تعداد مشخص شده توسط کاربر
 async function addToCartWithQty(itemId) {
-    const token = localStorage.getItem('token'); 
-    if (!token) return alert('لطفا ابتدا وارد سایت شوید.');
+  const token = localStorage.getItem('token');
+  if (!token) return alert('لطفا ابتدا وارد سایت شوید.');
 
-    const qtyInput = document.getElementById(`qty-${itemId}`);
-    const quantity = qtyInput ? parseInt(qtyInput.value) || 1 : 1;
+  const qtyInput = document.getElementById(`qty-${itemId}`);
+  const quantity = qtyInput ? parseInt(qtyInput.value) || 1 : 1;
 
-    try {
-        const response = await fetch(`${API_ORDERS}/cart/add`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ itemId: itemId, quantity: quantity })
-        });
+  try {
+    const response = await fetch(`${API_ORDERS}/cart/add`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ itemId: itemId, quantity: quantity })
+    });
 
-        const data = await response.json();
+    const data = await response.json();
 
-        if (response.ok) {
-            const cartCountElement = document.getElementById('cart-count');
-            if (cartCountElement) {
-                cartCountElement.innerText = data.totalItemsCount;
-            }
-            alert(`با موفقیت (${quantity} عدد) به سبد خرید اضافه شد.`);
-            fetchMenu();
-        } else {
-            alert(data.message || 'موجودی کافی نیست.');
-        }
-    } catch (error) {
-        console.error('Error adding to cart:', error);
-        alert('ارتباط با سرور برقرار نشد!');
+    if (response.ok) {
+      const cartCountElement = document.getElementById('cart-count');
+      if (cartCountElement) {
+        cartCountElement.innerText = data.totalItemsCount;
+      }
+      alert(`با موفقیت (${quantity} عدد) به سبد خرید اضافه شد.`);
+      fetchMenu();
+    } else {
+      alert(data.message || 'موجودی کافی نیست.');
     }
+  } catch (error) {
+    console.error('Error adding to cart:', error);
+    alert('ارتباط با سرور برقرار نشد!');
+  }
 }
 
 // دریافت تعداد آیتم‌های سبد خرید از سرور هنگام لود صفحه
 async function fetchCartCount() {
-    const token = localStorage.getItem('token');
-    const userStr = localStorage.getItem('user');
-    
-    if (!token || !userStr) return;
+  const token = localStorage.getItem('token');
+  const userStr = localStorage.getItem('user');
 
-    const user = JSON.parse(userStr);
-    const userRole = String(user.role || user.type || '').toLowerCase().trim();
+  if (!token || !userStr) return;
 
-    // فقط برای مشتریان سبد خرید را چک کن
-    if (userRole !== 'customer') return;
+  const user = JSON.parse(userStr);
+  const userRole = String(user.role || user.type || '').toLowerCase().trim();
 
-    try {
-        const response = await fetch(`${API_ORDERS}/cart`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
-        });
+  // فقط برای مشتریان سبد خرید را چک کن
+  if (userRole !== 'customer') return;
 
-        if (response.ok) {
-            const cart = await response.json();
-            const cartCountElement = document.getElementById('cart-count');
-            
-            if (cartCountElement && cart.items) {
-                const totalItemsCount = cart.items.reduce((acc, curr) => acc + curr.quantity, 0);
-                cartCountElement.innerText = totalItemsCount;
-            }
-        }
-    } catch (error) {
-        console.error('خطا در دریافت موجودی سبد خرید:', error);
+  try {
+    const response = await fetch(`${API_ORDERS}/cart`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (response.ok) {
+      const cart = await response.json();
+      const cartCountElement = document.getElementById('cart-count');
+
+      if (cartCountElement && cart.items) {
+        const totalItemsCount = cart.items.reduce((acc, curr) => acc + curr.quantity, 0);
+        cartCountElement.innerText = totalItemsCount;
+      }
     }
+  } catch (error) {
+    console.error('خطا در دریافت موجودی سبد خرید:', error);
+  }
+}
+
+// دریافت و نمایش گزارشات فروش ادمین
+async function fetchAdminReports() {
+  const token = localStorage.getItem('token');
+  if (!token) return;
+
+  try {
+    const response = await fetch(`${API_ORDERS}/reports`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+
+      // آپدیت گزارش روزانه
+      document.getElementById('dailySales').innerText = `${(data.daily?.totalSales || 0).toLocaleString('fa-IR')} تومان`;
+      document.getElementById('dailyCount').innerText = `تعداد سفارش: ${data.daily?.orderCount || 0}`;
+
+      // آپدیت گزارش هفتگی
+      document.getElementById('weeklySales').innerText = `${(data.weekly?.totalSales || 0).toLocaleString('fa-IR')} تومان`;
+      document.getElementById('weeklyCount').innerText = `تعداد سفارش: ${data.weekly?.orderCount || 0}`;
+
+      // آپدیت گزارش ماهانه
+      document.getElementById('monthlySales').innerText = `${(data.monthly?.totalSales || 0).toLocaleString('fa-IR')} تومان`;
+      document.getElementById('monthlyCount').innerText = `تعداد سفارش: ${data.monthly?.orderCount || 0}`;
+    } else {
+      console.error('خطا در دریافت گزارشات از سرور');
+    }
+  } catch (error) {
+    console.error('خطا در ارتباط با سرور برای گزارشات:', error);
+  }
 }

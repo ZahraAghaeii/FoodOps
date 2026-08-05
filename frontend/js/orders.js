@@ -25,7 +25,7 @@ async function fetchUserOrders() {
     listContainer.innerHTML = '<p style="text-align: center; color: #888; padding: 20px;">در حال دریافت اطلاعات...</p>';
 
     try {
-        // درخواست به روت سفارشات کاربر (که باید در بک‌اند داشته باشیم یا بنویسیم)
+        // درخواست به روت سفارشات کاربر
         const response = await fetch(`${API_ORDERS}/my-orders`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -47,8 +47,6 @@ function renderOrders(orders) {
     listContainer.innerHTML = '';
 
     // فیلتر کردن سفارشات بر اساس تب انتخابی
-    // Pending: سفارشاتی که هنوز تحویل یا لغو نشده‌اند (Preparing, Ready, Pending)
-    // History: سفارشات تکمیل شده یا لغو شده (Delivered, Cancelled)
     const filteredOrders = orders.filter(order => {
         if (currentTab === 'pending') {
             return ['Pending', 'Preparing', 'Ready'].includes(order.status);
@@ -82,19 +80,62 @@ function renderOrders(orders) {
             });
         }
 
+        // ایجاد دکمه لغو منحصراً برای سفارشات Pending
+        let cancelBtnHtml = '';
+        if (order.status === 'Pending') {
+            cancelBtnHtml = `
+                <button onclick="cancelOrder('${order._id}')" style="background: #e74c3c; color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.2s; width: 30%;">
+                    ❌ لغو سفارش
+                </button>
+            `;
+        }
+
+        // جایگذاری المان‌ها در کارت با اضافه شدن دکمه لغو
         card.innerHTML = `
-                    <div class="order-header">
-                        <span>کد سفارش: <b>${order._id.slice(-6)}</b></span>
-                        <span class="badge-status status-${order.status}">${statusText}</span>
-                    </div>
-                    <ul class="order-items-list">
-                        ${itemsHtml}
-                    </ul>
-                    <div class="order-footer">
-                        <span>مجموع کل:</span>
-                        <span style="color: #27ae60;">${(order.totalPrice || 0).toLocaleString('fa-IR')} تومان</span>
-                    </div>
-                `;
+            <div class="order-header">
+                <span>کد سفارش: <b>${order._id.slice(-6)}</b></span>
+                <span class="badge-status status-${order.status}">${statusText}</span>
+            </div>
+            <ul class="order-items-list">
+                ${itemsHtml}
+            </ul>
+            <div class="order-footer">
+                <div>
+                    <span style="font-size: 14px; color: #555;">مجموع کل:</span>
+                    <span style="color: #27ae60; font-size: 16px;">${(order.totalPrice || 0).toLocaleString('fa-IR')} تومان</span>
+                </div>
+                ${cancelBtnHtml}
+            </div>
+        `;
         listContainer.appendChild(card);
     });
+}
+
+// تابع لغو سفارش (ارتباط با سرور)
+async function cancelOrder(orderId) {
+    const confirmCancel = confirm("آیا از لغو این سفارش اطمینان دارید؟");
+    if (!confirmCancel) return;
+
+    const token = localStorage.getItem('token');
+    try {
+        const response = await fetch(`${API_ORDERS}/${orderId}/cancel`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alert('سفارش شما با موفقیت لغو شد.');
+            // رفرش کردن لیست سفارشات برای انتقال سفارش لغو شده به تاریخچه
+            fetchUserOrders();
+        } else {
+            alert(data.message || 'خطا در لغو سفارش');
+        }
+    } catch (err) {
+        console.error('Error cancelling order:', err);
+        alert('خطا در ارتباط با سرور.');
+    }
 }
