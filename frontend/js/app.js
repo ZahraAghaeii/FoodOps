@@ -3,6 +3,7 @@ const API_ORDERS = 'http://localhost:5000/api/orders';
 const API_CATEGORIES = 'http://localhost:5000/api/categories';
 
 let allMenuItems = []; // ذخیره تمام غذاها جهت فیلتر فرانت‌اند
+let currentCategoryFilter = 'all'; // ذخیره دسته‌بندی فعال جهت ترکیب با سرچ
 
 // چک کردن وضعیت لاگین و فراخوانی منو و دسته‌بندی‌ها هنگام بارگذاری صفحه
 window.onload = () => {
@@ -242,7 +243,7 @@ async function fetchMenu() {
     const res = await fetch(API_MENU);
     allMenuItems = await res.json();
 
-    renderMenuGrid(allMenuItems);
+    applyFilters(); // اعمال فیلترها (دسته + سرچ)
   } catch (err) {
     console.error(err);
     const menuGrid = document.getElementById('menuGrid');
@@ -250,6 +251,32 @@ async function fetchMenu() {
       menuGrid.innerHTML = '<p style="color:red;">خطا در دریافت منو از سرور!</p>';
     }
   }
+}
+
+// تابع اعمال همزمان فیلتر دسته‌بندی و جستجوی متنی
+function applyFilters() {
+  const searchInput = document.getElementById('menuSearchInput');
+  const searchTerm = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+  const filtered = allMenuItems.filter(item => {
+    // ۱. بررسی فیلتر دسته‌بندی
+    const itemCatId = item.category && (item.category._id || item.category);
+    const matchesCategory = (currentCategoryFilter === 'all') || (itemCatId === currentCategoryFilter);
+
+    // ۲. بررسی جستجوی متنی روی نام یا توضیحات غذا
+    const itemName = (item.name || '').toLowerCase();
+    const itemDesc = (item.description || '').toLowerCase();
+    const matchesSearch = itemName.includes(searchTerm) || itemDesc.includes(searchTerm);
+
+    return matchesCategory && matchesSearch;
+  });
+
+  renderMenuGrid(filtered);
+}
+
+// تابع مدیریت تایپ در اینپوت سرچ
+function handleSearchInput() {
+  applyFilters();
 }
 
 // رندر کردن غذاها در گرید فرانت‌اند (شامل نمایش تصویر اختصاصی ادمین و کنترلرهای تعداد)
@@ -260,7 +287,7 @@ function renderMenuGrid(items) {
   menuGrid.innerHTML = '';
 
   if (!Array.isArray(items) || items.length === 0) {
-    menuGrid.innerHTML = '<p>هیچ غذایی در این دسته‌بندی یافت نشد.</p>';
+    menuGrid.innerHTML = '<p>هیچ غذایی مطابقت نداشت.</p>';
     return;
   }
 
@@ -501,15 +528,8 @@ function filterMenu(categoryId, btnElement) {
   buttons.forEach(b => b.classList.remove('active'));
   if (btnElement) btnElement.classList.add('active');
 
-  if (categoryId === 'all') {
-    renderMenuGrid(allMenuItems);
-  } else {
-    const filtered = allMenuItems.filter(item => {
-      const itemCatId = item.category && (item.category._id || item.category);
-      return itemCatId === categoryId;
-    });
-    renderMenuGrid(filtered);
-  }
+  currentCategoryFilter = categoryId;
+  applyFilters(); // اعمال همزمان با سرچ
 }
 
 // نمایش سبد خرید بر اساس نقش کاربر

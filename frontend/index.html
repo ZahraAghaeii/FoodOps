@@ -98,6 +98,20 @@
       <!-- منوی غذاها -->
       <div class="menu-section">
         <h2>منوی غذا و نوشیدنی</h2>
+        
+        <!-- باکس جستجوی غذاها -->
+        <div style="margin-bottom: 15px; position: relative;">
+          <input 
+            type="text" 
+            id="menuSearchInput" 
+            placeholder="🔍 جستجوی نام غذا یا نوشیدنی (مثلاً موهیتو)..." 
+            oninput="handleSearchInput()"
+            style="width: 100%; padding: 12px 16px; font-size: 14px; border: 2px solid #e2e8f0; border-radius: 8px; outline: none; box-sizing: border-box; transition: border-color 0.2s;"
+            onfocus="this.style.borderColor='#3498db'"
+            onblur="this.style.borderColor='#e2e8f0'"
+          />
+        </div>
+
         <!-- نوار فیلتر دسته‌بندی‌ها -->
         <div class="category-filter-bar" id="categoryFilterBar">
           <button class="filter-btn active" onclick="filterMenu('all', this)">همه</button>
