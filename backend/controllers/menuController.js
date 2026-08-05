@@ -1,4 +1,5 @@
 const MenuItem = require('../models/MenuItem');
+const Category = require('../models/Category');
 
 // @desc    دریافت تمام غذاهای منو (امکان فیلتر بر اساس دسته‌بندی)
 // @route   GET /api/menu
@@ -19,7 +20,7 @@ exports.getMenuItems = async (req, res) => {
   }
 };
 
-// @desc    ایجاد آیتم جدید در منو
+// @desc    ایجاد آیتم جدید در منو (همراه با دریافت آدرس عکس دلخواه ادمین)
 // @route   POST /api/menu
 // @access  Private/Admin
 exports.createMenuItem = async (req, res) => {
@@ -31,7 +32,7 @@ exports.createMenuItem = async (req, res) => {
       description,
       price,
       category,
-      imageUrl,
+      imageUrl: imageUrl || '', // اگر ادمین آدرس عکس را وارد نکرد، خالی بماند
       isAvailable: isAvailable !== undefined ? isAvailable : true,
       stock: stock !== undefined ? Number(stock) : 100
     });
@@ -55,7 +56,6 @@ exports.updateMenuItem = async (req, res) => {
 
     Object.assign(menuItem, req.body);
     
-    // اگر موجودی دستی ۰ شد، غیرفعالش کن
     if (menuItem.stock === 0) {
       menuItem.isAvailable = false;
     }

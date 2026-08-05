@@ -204,7 +204,7 @@ async function fetchMenu() {
   }
 }
 
-// رندر کردن غذاها در گرید فرانت‌اند (با دکمه‌های کامپکت و کنار هم)
+// رندر کردن غذاها در گرید فرانت‌اند (شامل نمایش تصویر اختصاصی ادمین و کنترلرهای تعداد)
 function renderMenuGrid(items) {
   const menuGrid = document.getElementById('menuGrid');
   if (!menuGrid) return;
@@ -229,6 +229,8 @@ function renderMenuGrid(items) {
       ? item.category.name 
       : 'بدون دسته‌بندی';
 
+    const foodImage = (item.imageUrl && item.imageUrl.trim() !== '') ? item.imageUrl : '';
+
     const card = document.createElement('div');
     card.className = 'food-card';
 
@@ -250,7 +252,6 @@ function renderMenuGrid(items) {
       </div>
     ` : '';
 
-    // دکمه ثبت/افزودن به سبد به همراه قابلیت + (آبی) و - (قرمز) به صورت کامپکت
     let actionButton = '';
     if (isCustomer) {
       if (isOutOfStock) {
@@ -269,8 +270,11 @@ function renderMenuGrid(items) {
       }
     }
 
+    const imageHtml = foodImage ? `<img src="${foodImage}" alt="${item.name}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 6px; margin-bottom: 10px;" onerror="this.style.display='none'" />` : '';
+
     card.innerHTML = `
       <div>
+        ${imageHtml}
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
           <span style="font-size: 11px; background: #e0e0e0; color: #555; padding: 2px 8px; border-radius: 10px;">
             ${categoryName}
@@ -477,7 +481,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-// Listenerها برای فرم‌های ادمین
+// Listenerها برای فرم‌های ادمین (خواندن خودکار نام عکس از لپ‌تاپ)
 document.addEventListener('DOMContentLoaded', () => {
 
   // ۱. ثبت دسته‌بندی جدید
@@ -521,7 +525,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ۲. ثبت غذای جدید (ارسال موجودی اولیه)
+  // ۲. ثبت غذای جدید (تبدیل خودکار فایل انتخابی به مسیر images/...)
   const addMenuForm = document.getElementById('add-menu-form');
   if (addMenuForm) {
     addMenuForm.addEventListener('submit', async (e) => {
@@ -533,11 +537,21 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
+      const fileInput = document.getElementById('menu-image-file');
+      let imagePath = '';
+      
+      if (fileInput && fileInput.files && fileInput.files[0]) {
+        // نام فایل انتخابی از لپ‌تاپ را می‌خواند و مسیر images/ را به آن اضافه می‌کند
+        const fileName = fileInput.files[0].name;
+        imagePath = `images/${fileName}`;
+      }
+
       const menuItemData = {
         name: document.getElementById('menu-name').value,
         description: document.getElementById('menu-desc').value,
         price: Number(document.getElementById('menu-price').value),
         stock: Number(document.getElementById('menu-stock').value || 10),
+        imageUrl: imagePath, // ذخیره مسیر خودکار عکس
         category: document.getElementById('menu-category').value,
         isAvailable: true
       };
@@ -620,7 +634,6 @@ async function fetchCartCount() {
 
     try {
         const response = await fetch(`${API_ORDERS}/cart`, {
-            model: 'cors',
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

@@ -50,6 +50,13 @@
         <input type="text" id="menu-desc" placeholder="توضیحات غذا" required />
         <input type="number" id="menu-price" placeholder="قیمت (تومان)" required />
         <input type="number" id="menu-stock" placeholder="تعداد موجودی (مثلاً 50)" min="0" value="10" required />
+        
+        <!-- فیلتر انتخاب فایل از لپ‌تاپ به همراه متن راهنما -->
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <label style="font-size: 12px; color: #555; font-weight: bold;">انتخاب عکس غذا از لپ‌تاپ:</label>
+          <input type="file" id="menu-image-file" accept="image/*" style="padding: 6px; border: 1px solid #ccc; border-radius: 5px; background: #fff;" />
+        </div>
+
         <select id="menu-category" required>
           <option value="">در حال بارگذاری دسته‌بندی‌ها...</option>
         </select>

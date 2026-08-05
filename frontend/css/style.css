@@ -6,7 +6,7 @@
 }
 
 body {
-  background-color: #fff9f5; /* تم نارنجی ملایم و گرم */
+  background-color: #fff9f5;
   color: #333;
   direction: rtl;
 }
@@ -23,10 +23,6 @@ header {
 header h1 {
   font-size: 18px !important;
 }
-
-/* ========================================== */
-/*            Hero Banner & Overlay           */
-/* ========================================== */
 
 .hero-banner {
   position: relative;
@@ -149,10 +145,6 @@ button:hover {
   margin: 10px 0;
 }
 
-/* ========================================== */
-/*           Kitchen Dashboard Styles         */
-/* ========================================== */
-
 .kitchen-header {
   display: flex;
   justify-content: space-between;
@@ -178,17 +170,10 @@ button:hover {
   border-top: 5px solid #ccc;
 }
 
-.order-card.status-pending { 
-  border-top-color: #f39c12; 
-}
-
-.order-card.status-in_preparation { 
-  border-top-color: #3498db; 
-}
-
-.order-card.status-ready { 
-  border-top-color: #2ecc71; 
-}
+.order-card.status-pending { border-top-color: #f39c12; }
+.order-card.status-in_preparation { border-top-color: #3498db; }
+.order-card.status-ready { border-top-color: #2ecc71; }
+.order-card.status-delivered { border-top-color: #27ae60; }
 
 .order-card h3 {
   margin-top: 0;
@@ -212,18 +197,8 @@ button:hover {
   gap: 10px;
 }
 
-.btn-start {
+.btn-start, .btn-ready, .btn-deliver {
   background-color: #3498db;
-  color: white;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 5px;
-  cursor: pointer;
-  width: 100%;
-}
-
-.btn-ready {
-  background-color: #2ecc71;
   color: white;
   border: none;
   padding: 8px 14px;
@@ -243,44 +218,8 @@ button:hover {
   width: 100%;
 }
 
-/* ========================================== */
-/*          Delivery Dashboard Styles         */
-/* ========================================== */
-
-.order-card.status-delivered { 
-  border-top-color: #27ae60; 
-}
-
-.btn-deliver {
-  background-color: #27ae60;
-  color: white;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 5px;
-  cursor: pointer;
-  width: 100%;
-}
-
-.btn-deliver:hover {
-  background-color: #219150;
-}
-
-/* ========================================== */
-/*         Main Index & Order Page Styles     */
-/* ========================================== */
-
-.header-right { 
-  display: flex; 
-  align-items: center; 
-  gap: 15px; 
-}
-
-.user-info { 
-  font-size: 13px; 
-  display: flex; 
-  align-items: center; 
-  gap: 10px; 
-}
+.header-right { display: flex; align-items: center; gap: 15px; }
+.user-info { font-size: 13px; display: flex; align-items: center; gap: 10px; }
 
 .btn-logout { 
   width: auto !important;
@@ -293,22 +232,10 @@ button:hover {
   font-size: 13px;
   transition: background 0.3s;
 }
+.btn-logout:hover { background: #c0392b; }
 
-.btn-logout:hover { 
-  background: #c0392b; 
-}
-
-.navbar { 
-  list-style: none; 
-  display: flex; 
-  align-items: center; 
-  margin: 0; 
-  padding: 0; 
-}
-
-#cart-nav-item { 
-  display: none; 
-}
+.navbar { list-style: none; display: flex; align-items: center; margin: 0; padding: 0; }
+#cart-nav-item { display: none; }
 
 #cart-nav-item a { 
   display: inline-flex; 
@@ -321,13 +248,7 @@ button:hover {
   border-radius: 20px; 
   font-weight: bold; 
   font-size: 13px;
-  transition: background-color 0.3s, transform 0.2s;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-#cart-nav-item a:hover {
-  background-color: #45e64a;
-  transform: translateY(-1px);
 }
 
 #cart-count { 
@@ -338,13 +259,8 @@ button:hover {
   font-size: 11px; 
 }
 
-.main-content { 
-  display: flex; 
-  gap: 20px; 
-  width: 100%; 
-}
+.main-content { display: flex; gap: 20px; width: 100%; }
 
-/* بخش‌های مدیریت (مخصوص ادمین) */
 .admin-section { 
   background: white; 
   padding: 15px 20px; 
@@ -354,11 +270,7 @@ button:hover {
   display: none; 
 }
 
-.admin-section h2 { 
-  font-size: 15px; 
-  margin-bottom: 10px; 
-  color: #2c3e50; 
-}
+.admin-section h2 { font-size: 15px; margin-bottom: 10px; color: #2c3e50; }
 
 .admin-form { 
   display: grid; 
@@ -387,17 +299,7 @@ button:hover {
   font-weight: bold; 
 }
 
-.btn-submit-food:hover, .btn-submit-cat:hover { 
-  background: #732d91; 
-}
-
-.category-filter-bar { 
-  display: flex; 
-  flex-direction: row; 
-  gap: 8px; 
-  margin: 12px 0 18px 0; 
-  flex-wrap: wrap; 
-}
+.category-filter-bar { display: flex; gap: 8px; margin: 12px 0 18px 0; flex-wrap: wrap; }
 
 .filter-btn { 
   width: auto !important; 
@@ -410,21 +312,9 @@ button:hover {
   cursor: pointer; 
   font-size: 13px; 
   font-weight: bold; 
-  transition: all 0.2s ease-in-out; 
 }
+.filter-btn.active { background: #2c3e50 !important; color: white !important; }
 
-.filter-btn:hover {
-  background: #cbd5e1;
-  color: #1e293b;
-}
-
-.filter-btn.active { 
-  background: #2c3e50 !important; 
-  color: white !important; 
-  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-}
-
-/* کارت‌های منوی غذاها */
 .menu-section { width: 100%; flex: 1; }
 
 .food-card { 
@@ -437,42 +327,10 @@ button:hover {
   justify-content: space-between; 
 }
 
-.food-card h3 { 
-  font-size: 16px; 
-  margin-bottom: 8px; 
-  color: #2c3e50; 
-}
+.food-card h3 { font-size: 16px; margin-bottom: 8px; color: #2c3e50; }
+.food-card p { font-size: 12px; color: #666; margin-bottom: 12px; flex-grow: 1; }
+.food-price { font-weight: bold; color: #27ae60; font-size: 15px; margin-bottom: 10px; }
 
-.food-card p { 
-  font-size: 12px; 
-  color: #666; 
-  margin-bottom: 12px; 
-  flex-grow: 1; 
-}
-
-.food-price { 
-  font-weight: bold; 
-  color: #27ae60; 
-  font-size: 15px; 
-  margin-bottom: 10px; 
-}
-
-.btn-add { 
-  width: 100%;
-  background: #27ae60; 
-  color: white; 
-  border: none; 
-  padding: 8px; 
-  border-radius: 5px; 
-  cursor: pointer; 
-  font-weight: bold; 
-}
-
-.btn-add:hover { 
-  background: #219150; 
-}
-
-/* بخش سبد خرید */
 .cart-section { 
   flex: 1; 
   background: white; 
@@ -482,37 +340,11 @@ button:hover {
   height: fit-content; 
 }
 
-.cart-section h2 { 
-  font-size: 17px; 
-  margin-bottom: 15px; 
-  border-bottom: 2px solid #eee; 
-  padding-bottom: 8px; 
-}
-
-.cart-items { 
-  list-style: none; 
-  margin-bottom: 15px; 
-  max-height: 300px; 
-  overflow-y: auto; 
-}
-
-.cart-item { 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  padding: 8px 0; 
-  border-bottom: 1px solid #f0f0f0; 
-  font-size: 14px; 
-}
-
-.cart-item-title { 
-  flex: 1; 
-}
-
-.cart-item-qty { 
-  font-weight: bold; 
-  margin: 0 8px; 
-}
+.cart-section h2 { font-size: 17px; margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 8px; }
+.cart-items { list-style: none; margin-bottom: 15px; max-height: 300px; overflow-y: auto; }
+.cart-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+.cart-item-title { flex: 1; }
+.cart-item-qty { font-weight: bold; margin: 0 8px; }
 
 .btn-remove { 
   width: 22px !important; 
@@ -523,169 +355,33 @@ button:hover {
   border-radius: 50%; 
   cursor: pointer; 
   font-size: 12px; 
-  padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
-.cart-total { 
-  font-weight: bold; 
-  font-size: 15px; 
-  margin-top: 15px; 
-  display: flex; 
-  justify-content: space-between; 
-}
-
-.btn-checkout { 
-  width: 100%;
-  background: #2980b9; 
-  color: white; 
-  border: none; 
-  padding: 10px; 
-  border-radius: 6px; 
-  font-weight: bold; 
-  margin-top: 15px; 
-  cursor: pointer; 
-  font-size: 14px; 
-}
-
-.btn-checkout:hover { 
-  background: #1f6391; 
-}
-
-.price-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.btn-edit-price {
-  width: auto !important;
-  background: #f39c12;
-  color: white;
-  border: none;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 11px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-edit-price:hover {
-  background: #d35400;
-}
+.cart-total { font-weight: bold; font-size: 15px; margin-top: 15px; display: flex; justify-content: space-between; }
+.btn-checkout { width: 100%; background: #2980b9; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; margin-top: 15px; cursor: pointer; font-size: 14px; }
 
 /* ========================================== */
 /*            Profile & User Admin            */
 /* ========================================== */
-
-.profile-container { 
-  max-width: 950px; 
-  margin: 30px auto; 
-  padding: 0 15px; 
-}
-
-.card-box { 
-  background: #ffffff; 
-  padding: 25px; 
-  border-radius: 10px; 
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06); 
-  margin-bottom: 25px; 
-}
-
-.card-box h2 {
-  font-size: 18px;
-  color: #2c3e50;
-  margin-bottom: 18px;
-  border-bottom: 2px solid #f0f0f0;
-  padding-bottom: 10px;
-}
-
-.profile-form-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 15px;
-}
-
-.btn-save-prof {
-  background: #27ae60;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  margin-top: 10px;
-  width: auto !important;
-}
-
-.btn-save-prof:hover {
-  background: #219150;
-}
-
-.btn-create-staff {
-  background: #2980b9;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  margin-top: 10px;
-  width: auto !important;
-}
-
-.btn-create-staff:hover {
-  background: #1f6391;
-}
-
-.users-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 15px;
-  text-align: right;
-}
-
-.users-table th, .users-table td {
-  padding: 12px 10px;
-  border-bottom: 1px solid #eee;
-  font-size: 13px;
-}
-
-.users-table th {
-  background-color: #f8f9fa;
-  color: #2c3e50;
-}
-
-.role-badge {
-  padding: 3px 8px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: bold;
-  display: inline-block;
-}
-
+.profile-container { max-width: 950px; margin: 30px auto; padding: 0 15px; }
+.card-box { background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); margin-bottom: 25px; }
+.card-box h2 { font-size: 18px; color: #2c3e50; margin-bottom: 18px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
+.profile-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
+.btn-save-prof { background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; width: auto !important; }
+.btn-create-staff { background: #2980b9; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; width: auto !important; }
+.users-table { width: 100%; border-collapse: collapse; margin-top: 15px; text-align: right; }
+.users-table th, .users-table td { padding: 12px 10px; border-bottom: 1px solid #eee; font-size: 13px; }
+.users-table th { background-color: #f8f9fa; color: #2c3e50; }
+.role-badge { padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; display: inline-block; }
 .role-admin { background: #e74c3c; color: white; }
 .role-customer { background: #3498db; color: white; }
 .role-kitchen { background: #c77a0e; color: white; }
 .role-cashier { background: #2ecc71; color: white; }
-
-.btn-profile-link {
-  color: #f4eff2;
-  text-decoration: none;
-  font-size: 13px;
-  font-weight: bold;
-  background-color: #34495e;
-  padding: 5px 12px;
-  border-radius: 4px;
-  transition: background 0.3s;
-}
-
-.btn-profile-link:hover {
-  background-color: #1abc9c;
-}
+.btn-profile-link { color: #f4eff2; text-decoration: none; font-size: 13px; font-weight: bold; background-color: #34495e; padding: 5px 12px; border-radius: 4px; transition: background 0.3s; }
+.btn-profile-link:hover { background-color: #1abc9c; }
 
 /* ========================================== */
 /*     Compact Inline Quantity & Cart UI      */
@@ -709,56 +405,59 @@ button:hover {
   height: 38px;
 }
 
+/* دکمه منفی کوچک قرمز */
 .qty-inline-btn-minus {
   background: #e74c3c;
   color: white;
   border: none;
-  width: 26px;
+  width: 28px;
   height: 100%;
   cursor: pointer;
   font-weight: bold;
-  font-size: 14px;
+  font-size: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background 0.2s;
 }
-
 .qty-inline-btn-minus:hover {
   background: #c0392b;
 }
 
+/* دکمه مثبت کوچک آبی */
 .qty-inline-btn-plus {
   background: #3498db;
   color: white;
   border: none;
-  width: 26px;
+  width: 28px;
   height: 100%;
   cursor: pointer;
   font-weight: bold;
-  font-size: 14px;
+  font-size: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background 0.2s;
 }
-
 .qty-inline-btn-plus:hover {
   background: #2980b9;
 }
 
 .qty-inline-input {
-  width: 30px;
+  width: 32px;
   text-align: center;
   border: none;
   background: transparent;
   font-weight: bold;
-  font-size: 13px;
+  font-size: 14px;
   color: #1e293b;
   outline: none;
 }
 
+/* دکمه افزودن به سبد نارنجی/قهوه‌ای گرم */
 .btn-inline-add {
   flex: 1;
-  background: #27ae60;
+  background: linear-gradient(135deg, #d35400, #e67e22);
   color: white;
   border: none;
   height: 38px;
@@ -766,9 +465,12 @@ button:hover {
   font-weight: bold;
   cursor: pointer;
   font-size: 12px;
-  transition: background 0.2s;
+  box-shadow: 0 2px 4px rgba(211, 84, 0, 0.25);
+  transition: all 0.2s ease;
 }
 
 .btn-inline-add:hover {
-  background: #219150;
+  background: linear-gradient(135deg, #b54600, #d35400);
+  box-shadow: 0 4px 6px rgba(211, 84, 0, 0.35);
+  transform: translateY(-1px);
 }
