@@ -204,7 +204,7 @@ async function fetchMenu() {
   }
 }
 
-// رندر کردن غذاها در گرید فرانت‌اند (به همراه مدیریت موجودی)
+// رندر کردن غذاها در گرید فرانت‌اند (با دکمه‌های کامپکت و کنار هم)
 function renderMenuGrid(items) {
   const menuGrid = document.getElementById('menuGrid');
   if (!menuGrid) return;
@@ -219,12 +219,12 @@ function renderMenuGrid(items) {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const userRole = String(user.role || user.type || '').toLowerCase().trim();
   const isAdmin = userRole.includes('admin');
+  const isCustomer = userRole === 'customer';
 
   items.forEach(item => {
     const stockCount = item.stock !== undefined ? item.stock : 0;
     const isOutOfStock = !item.isAvailable || stockCount <= 0;
 
-    // کاربران عادی غذاهای ناموجود را هم می‌بینند ولی دکمه‌شان غیرفعال است
     const categoryName = item.category && item.category.name 
       ? item.category.name 
       : 'بدون دسته‌بندی';
@@ -250,10 +250,24 @@ function renderMenuGrid(items) {
       </div>
     ` : '';
 
-    // دکمه ثبت/افزودن به سبد
-    const actionButton = isOutOfStock
-      ? `<button class="btn-add" disabled style="background: #e74c3c; cursor: not-allowed; opacity: 0.8;">❌ ناموجود</button>`
-      : `<button class="btn-add" onclick="addToCart('${item._id}')">افزودن به سبد</button>`;
+    // دکمه ثبت/افزودن به سبد به همراه قابلیت + (آبی) و - (قرمز) به صورت کامپکت
+    let actionButton = '';
+    if (isCustomer) {
+      if (isOutOfStock) {
+        actionButton = `<button class="btn-inline-add" disabled style="background: #e74c3c; cursor: not-allowed; opacity: 0.8; margin-top: 10px;">❌ ناموجود</button>`;
+      } else {
+        actionButton = `
+          <div class="cart-action-row">
+            <div class="qty-inline-box">
+              <button class="qty-inline-btn-minus" onclick="decreaseQty('${item._id}')">-</button>
+              <input type="text" id="qty-${item._id}" class="qty-inline-input" value="1" readonly />
+              <button class="qty-inline-btn-plus" onclick="increaseQty('${item._id}', ${stockCount})">+</button>
+            </div>
+            <button class="btn-inline-add" onclick="addToCartWithQty('${item._id}')">افزودن به سبد</button>
+          </div>
+        `;
+      }
+    }
 
     card.innerHTML = `
       <div>
@@ -278,6 +292,27 @@ function renderMenuGrid(items) {
     `;
     menuGrid.appendChild(card);
   });
+}
+
+// توابع کمکی برای دکمه‌های + و - روی کارت غذا
+function decreaseQty(itemId) {
+  const input = document.getElementById(`qty-${itemId}`);
+  if (!input) return;
+  let currentVal = parseInt(input.value) || 1;
+  if (currentVal > 1) {
+    input.value = currentVal - 1;
+  }
+}
+
+function increaseQty(itemId, maxStock) {
+  const input = document.getElementById(`qty-${itemId}`);
+  if (!input) return;
+  let currentVal = parseInt(input.value) || 1;
+  if (currentVal < maxStock) {
+    input.value = currentVal + 1;
+  } else {
+    alert(`حداکثر موجودی انبار ${maxStock} عدد است.`);
+  }
 }
 
 // تغییر تعداد موجودی (مخصوص ادمین)
@@ -534,20 +569,22 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// افزودن به سبد خرید (متصل به بک‌اند)
-async function addToCart(itemId) {
+// افزودن به سبد خرید با در نظر گرفتن تعداد مشخص شده توسط کاربر
+async function addToCartWithQty(itemId) {
     const token = localStorage.getItem('token'); 
     if (!token) return alert('لطفا ابتدا وارد سایت شوید.');
 
+    const qtyInput = document.getElementById(`qty-${itemId}`);
+    const quantity = qtyInput ? parseInt(qtyInput.value) || 1 : 1;
+
     try {
-        // آدرس به صورت کامل با متغیر API_ORDERS جایگزین شد 👇
         const response = await fetch(`${API_ORDERS}/cart/add`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ itemId: itemId, quantity: 1 })
+            body: JSON.stringify({ itemId: itemId, quantity: quantity })
         });
 
         const data = await response.json();
@@ -557,10 +594,10 @@ async function addToCart(itemId) {
             if (cartCountElement) {
                 cartCountElement.innerText = data.totalItemsCount;
             }
-            alert('با موفقیت به سبد خرید اضافه شد.');
+            alert(`با موفقیت (${quantity} عدد) به سبد خرید اضافه شد.`);
             fetchMenu();
         } else {
-            alert(data.message || 'موجودی این غذا تمام شده است.');
+            alert(data.message || 'موجودی کافی نیست.');
         }
     } catch (error) {
         console.error('Error adding to cart:', error);
@@ -583,6 +620,7 @@ async function fetchCartCount() {
 
     try {
         const response = await fetch(`${API_ORDERS}/cart`, {
+            model: 'cors',
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -595,7 +633,6 @@ async function fetchCartCount() {
             const cartCountElement = document.getElementById('cart-count');
             
             if (cartCountElement && cart.items) {
-                // محاسبه مجموع تعداد آیتم‌های درون سبد
                 const totalItemsCount = cart.items.reduce((acc, curr) => acc + curr.quantity, 0);
                 cartCountElement.innerText = totalItemsCount;
             }
