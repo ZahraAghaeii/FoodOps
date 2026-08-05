@@ -30,8 +30,15 @@ const orderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['cart','Pending', 'Preparing', 'Ready', 'Delivered', 'Cancelled'],
+    enum: ['cart', 'Pending', 'Preparing', 'Ready', 'Delivered', 'Cancelled'],
     default: 'Pending'
+  },
+  prepTimeMinutes: {
+    type: Number,
+    default: 15
+  },
+  estimatedReadyAt: {
+    type: Date
   }
 }, { timestamps: true });
 

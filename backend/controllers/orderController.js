@@ -15,8 +15,9 @@ exports.createOrder = async (req, res) => {
     let totalPrice = 0;
     const orderItems = [];
     const itemsToUpdate = [];
+    let maxPrepTime = 15; // حداقل زمان پیش‌فرض
 
-    // ۱. بررسی موجودی تمامی آیتم‌ها
+    // ۱. بررسی موجودی تمامی آیتم‌ها و محاسبه زمان آماده‌سازی
     for (const item of items) {
       const menuItem = await MenuItem.findById(item.menuItem);
       if (!menuItem) {
@@ -26,6 +27,12 @@ exports.createOrder = async (req, res) => {
         return res.status(400).json({ 
           message: `موجودی آیتم "${menuItem.name}" کافی نیست (موجودی فعلی: ${menuItem.stock})` 
         });
+      }
+
+      // محاسبه بیشترین زمان آماده‌سازی بین غذاهای انتخابی
+      const itemPrepTime = menuItem.prepTime || 15;
+      if (itemPrepTime > maxPrepTime) {
+        maxPrepTime = itemPrepTime;
       }
 
       totalPrice += menuItem.price * item.quantity;
@@ -51,33 +58,23 @@ exports.createOrder = async (req, res) => {
       await itemObj.model.save();
     }
 
+    // محاسبه زمان دقیق تحویل تخمینی
+    const estimatedReadyAt = new Date(Date.now() + maxPrepTime * 60 * 1000);
+
     // ۳. ایجاد سفارش
     const order = await Order.create({
       customer: req.user._id,
       items: orderItems,
       totalPrice,
-      status: 'Pending'
+      status: 'Pending',
+      prepTimeMinutes: maxPrepTime,
+      estimatedReadyAt: estimatedReadyAt
     });
 
     res.status(201).json(order);
   } catch (error) {
     console.error('خطا در ثبت سفارش:', error);
     res.status(500).json({ message: 'خطا در ثبت سفارش', error: error.message });
-  }
-};
-
-// @desc    مشاهده سفارش‌های کاربر جاری
-// @route   GET /api/orders/me
-// @access  Private (Customer)
-exports.getMyOrders = async (req, res) => {
-  try {
-    const orders = await Order.find({ customer: req.user._id })
-      .populate('items.menuItem', 'name price imageUrl')
-      .sort({ createdAt: -1 });
-
-    res.json(orders);
-  } catch (error) {
-    res.status(500).json({ message: 'خطا در دریافت سفارش‌ها', error: error.message });
   }
 };
 
@@ -292,8 +289,22 @@ exports.checkoutCart = async (req, res) => {
             return res.status(400).json({ message: 'سبد خرید شما خالی است.' });
         }
 
-        // تغییر وضعیت به Pending (ارسال به صف آشپزخانه)
-        cart.status = 'Pending'; 
+        // محاسبه زمان آماده‌سازی نهایی بر اساس غذاهای موجود در سبد
+        let maxPrepTime = 15;
+        for (const item of cart.items) {
+            const menuItem = await MenuItem.findById(item.menuItem);
+            if (menuItem && menuItem.prepTime && menuItem.prepTime > maxPrepTime) {
+                maxPrepTime = menuItem.prepTime;
+            }
+        }
+
+        const estimatedReadyAt = new Date(Date.now() + maxPrepTime * 60 * 1000);
+
+        // تغییر وضعیت به Pending و ذخیره زمان آماده‌سازی
+        cart.status = 'Pending';
+        cart.prepTimeMinutes = maxPrepTime;
+        cart.estimatedReadyAt = estimatedReadyAt;
+        
         await cart.save();
 
         res.status(200).json({ message: 'سفارش با موفقیت ثبت شد و به آشپزخانه ارسال گردید.' });
@@ -305,9 +316,8 @@ exports.checkoutCart = async (req, res) => {
 // دریافت تمام سفارشات کاربر (به جز سبد خریدهای نهایی‌نشده)
 exports.getMyOrders = async (req, res) => {
     try {
-        // دستور { $ne: 'cart' } یعنی وضعیت برابر با cart نباشد
         const orders = await Order.find({ customer: req.user._id, status: { $ne: 'cart' } })
-            .populate('items.menuItem', 'name price')
+            .populate('items.menuItem', 'name price prepTime')
             .sort({ createdAt: -1 });
 
         res.status(200).json(orders);
@@ -321,23 +331,19 @@ exports.cancelOrderCustomer = async (req, res) => {
     try {
         const orderId = req.params.id;
         
-        // پیدا کردن سفارشِ همین کاربر
         const order = await Order.findOne({ _id: orderId, customer: req.user._id });
 
         if (!order) {
             return res.status(404).json({ message: 'سفارش یافت نشد.' });
         }
 
-        // بررسی اینکه آیا سفارش هنوز Pending است
         if (order.status !== 'Pending') {
             return res.status(400).json({ message: 'این سفارش وارد مرحله آماده‌سازی شده و دیگر قابل لغو نیست.' });
         }
 
-        // تغییر وضعیت به لغو شده
         order.status = 'Cancelled';
         await order.save();
 
-        // بازگرداندن موجودی غذاها به منو
         for (const item of order.items) {
             const menuItem = await MenuItem.findById(item.menuItem);
             if (menuItem) {
@@ -355,7 +361,6 @@ exports.cancelOrderCustomer = async (req, res) => {
 // دریافت گزارشات فروش (مخصوص ادمین)
 exports.getSalesReports = async (req, res) => {
     try {
-        // تبدیل نقش به حروف کوچک برای جلوگیری از خطای Case-Sensitive
         const userRole = String(req.user.role).toLowerCase();
         
         if (userRole !== 'admin') {
@@ -363,8 +368,6 @@ exports.getSalesReports = async (req, res) => {
         }
 
         const now = new Date();
-        
-        // محاسبه تاریخ‌های شروع
         const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         
         const startOfWeek = new Date(startOfDay);
@@ -373,13 +376,12 @@ exports.getSalesReports = async (req, res) => {
         const startOfMonth = new Date(startOfDay);
         startOfMonth.setMonth(startOfDay.getMonth() - 1);
 
-        // اجرای Aggregation روی دیتابیس
         const getStats = async (startDate) => {
             const result = await Order.aggregate([
                 { 
                     $match: { 
                         createdAt: { $gte: startDate }, 
-                        status: 'Delivered' // فقط سفارشات تکمیل شده
+                        status: 'Delivered'
                     } 
                 },
                 { 
@@ -411,11 +413,10 @@ exports.getAllOrders = async (req, res) => {
             return res.status(403).json({ message: 'عدم دسترسی' });
         }
 
-        // واکشی تمام سفارشاتی که سبد خرید (cart) نیستند
         const orders = await Order.find({ status: { $ne: 'cart' } })
-            .populate('customer', 'name phone') // گرفتن نام و شماره مشتری
+            .populate('customer', 'name phone')
             .populate('items.menuItem', 'name price')
-            .sort({ createdAt: -1 }); // مرتب‌سازی از جدیدترین به قدیمی‌ترین
+            .sort({ createdAt: -1 });
 
         res.status(200).json(orders);
     } catch (error) {

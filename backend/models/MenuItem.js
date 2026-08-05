@@ -31,6 +31,10 @@ const menuItemSchema = new mongoose.Schema({
   stock: {
     type: Number,
     default: 100
+  },
+  prepTime: {
+    type: Number,
+    default: 15 // زمان آماده‌سازی به دقیقه (پیش‌فرض ۱۵ دقیقه)
   }
 }, { timestamps: true });
 
