@@ -82,6 +82,8 @@ document.getElementById('profile-form')?.addEventListener('submit', async (e) =>
 
 async function fetchAllUsers() {
   const token = localStorage.getItem('token');
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+
   try {
     const res = await fetch(`${API_AUTH}/users`, {
       headers: { 'Authorization': `Bearer ${token}` }
@@ -94,7 +96,7 @@ async function fetchAllUsers() {
     tbody.innerHTML = '';
 
     if (!Array.isArray(users) || users.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5">هیچ کاربری یافت نشد.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6">هیچ کاربری یافت نشد.</td></tr>';
       return;
     }
 
@@ -102,9 +104,10 @@ async function fetchAllUsers() {
       const tr = document.createElement('tr');
       const roleStr = String(u.role || 'Customer');
       const roleLower = roleStr.toLowerCase().replace(/\s+/g, '');
+      const isSelf = u._id === currentUser._id;
 
       tr.innerHTML = `
-        <td>${u.name}</td>
+        <td>${u.name} ${isSelf ? ' <small style="color: #27ae60;">(شما)</small>' : ''}</td>
         <td>${u.email}</td>
         <td>${u.phone || 'ثبت نشده'}</td>
         <td><span class="role-badge role-${roleLower}">${roleStr}</span></td>
@@ -115,6 +118,13 @@ async function fetchAllUsers() {
             <option value="Cashier" ${roleStr === 'Cashier' ? 'selected' : ''}>صندوق‌دار (Cashier)</option>
             <option value="Admin" ${roleStr === 'Admin' ? 'selected' : ''}>ادمین (Admin)</option>
           </select>
+        </td>
+        <td>
+          ${isSelf ? '<span style="color: #aaa; font-size: 11px;">غیرقابل حذف</span>' : `
+            <button onclick="deleteUser('${u._id}', '${u.name}')" style="background: #dc2626; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; width: auto !important;">
+              🗑️ حذف
+            </button>
+          `}
         </td>
       `;
       tbody.appendChild(tr);
@@ -149,6 +159,33 @@ async function changeUserRole(userId, newRole) {
   }
 }
 
+// حذف کاربر توسط ادمین
+async function deleteUser(userId, userName) {
+  const confirmDelete = confirm(`آیا از حذف کاربر «${userName}» اطمینان دارید؟`);
+  if (!confirmDelete) return;
+
+  const token = localStorage.getItem('token');
+  try {
+    const res = await fetch(`${API_AUTH}/users/${userId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      alert(`کاربر «${userName}» با موفقیت حذف شد! 🗑️`);
+      fetchAllUsers();
+    } else {
+      alert(data.message || 'خطا در حذف کاربر');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('خطا در ارتباط با سرور');
+  }
+}
+
 // ثبت پرسنل و نمایش رمز موقت در باکس اختصاصی روی صفحه
 document.getElementById('create-staff-form')?.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -173,7 +210,6 @@ document.getElementById('create-staff-form')?.addEventListener('submit', async (
 
     const data = await res.json();
     if (res.ok) {
-      // نمایش باکس رمز عبور موقت تولید شده
       const box = document.getElementById('temp-password-box');
       const val = document.getElementById('temp-pass-val');
       
@@ -193,7 +229,6 @@ document.getElementById('create-staff-form')?.addEventListener('submit', async (
   }
 });
 
-// تابع کپی کردن رمز موقت در کلپ‌بورد
 function copyTempPassword() {
   const val = document.getElementById('temp-pass-val')?.innerText;
   if (val && val !== '---') {

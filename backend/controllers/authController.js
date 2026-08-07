@@ -70,7 +70,6 @@ exports.login = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (user && (await user.matchPassword(password))) {
-      // اطمینان از مقداردهی درست boolean
       const isTemp = user.isPasswordTemp === true;
 
       res.json({
@@ -252,6 +251,30 @@ exports.createStaff = async (req, res) => {
   } catch (error) {
     console.error('Create Staff Error:', error);
     res.status(500).json({ message: 'خطا در ایجاد کاربر پرسنل' });
+  }
+};
+
+// @desc    حذف کاربر توسط ادمین
+// @route   DELETE /api/auth/users/:id
+exports.deleteUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'کاربر مورد نظر یافت نشد' });
+    }
+
+    // جلوگیری از حذف حساب جاری خود ادمین
+    if (user._id.toString() === req.user._id.toString()) {
+      return res.status(400).json({ message: 'شما نمی‌توانید حساب کاربری خودتان را حذف کنید!' });
+    }
+
+    await User.findByIdAndDelete(req.params.id);
+
+    res.json({ message: 'کاربر با موفقیت حذف شد' });
+  } catch (error) {
+    console.error('Delete User Error:', error);
+    res.status(500).json({ message: 'خطا در حذف کاربر' });
   }
 };
 
