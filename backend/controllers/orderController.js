@@ -1,6 +1,7 @@
 const Order = require('../models/Order');
 const MenuItem = require('../models/MenuItem');
 const Settings = require('../models/Settings');
+const Discount = require('../models/Discount');
 
 // تابع کمکی بررسی باز بودن سیستم در زمان فعلی
 const checkIsWorkingHours = async () => {
@@ -69,12 +70,9 @@ exports.updateWorkingHours = async (req, res) => {
   }
 };
 
-// @desc    ثبت سفارش جدید توسط مشتری (به همراه کسر خودکار موجودی و چک ساعات کاری)
-// @route   POST /api/orders
-// @access  Private (Customer)
+// @desc    ثبت سفارش جدید توسط مشتری
 exports.createOrder = async (req, res) => {
   try {
-    // بررسی ساعات کاری
     const workingCheck = await checkIsWorkingHours();
     if (!workingCheck.isOpen) {
       return res.status(400).json({ message: workingCheck.message });
@@ -147,9 +145,6 @@ exports.createOrder = async (req, res) => {
   }
 };
 
-// @desc    مشاهده تمام سفارش‌ها (مشاهده صف آشپزخانه)
-// @route   GET /api/orders/kitchen
-// @access  Private (Kitchen Staff / Admin)
 exports.getKitchenOrders = async (req, res) => {
   try {
     const role = String(req.user.role || req.user.type || '').toLowerCase().trim();
@@ -175,61 +170,45 @@ exports.getKitchenOrders = async (req, res) => {
   }
 };
 
-// @desc    شروع آماده‌سازی سفارش
 exports.startOrder = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
-
-    if (!order) {
-      return res.status(404).json({ message: 'سفارش یافت نشد' });
-    }
+    if (!order) return res.status(404).json({ message: 'سفارش یافت نشد' });
 
     order.status = 'Preparing';
     const updatedOrder = await order.save();
-
     res.json({ message: 'وضعیت سفارش به در حال آماده‌سازی تغییر یافت', order: updatedOrder });
   } catch (error) {
     res.status(500).json({ message: 'خطا در تغییر وضعیت سفارش', error: error.message });
   }
 };
 
-// @desc    تغییر وضعیت سفارش به آماده تحویل
 exports.readyOrder = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
-
-    if (!order) {
-      return res.status(404).json({ message: 'سفارش یافت نشد' });
-    }
+    if (!order) return res.status(404).json({ message: 'سفارش یافت نشد' });
 
     order.status = 'Ready';
     const updatedOrder = await order.save();
-
     res.json({ message: 'سفارش آماده تحویل شد', order: updatedOrder });
   } catch (error) {
     res.status(500).json({ message: 'خطا در تغییر وضعیت سفارش', error: error.message });
   }
 };
 
-// @desc    تحویل سفارش به مشتری
 exports.deliverOrder = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
-
-    if (!order) {
-      return res.status(404).json({ message: 'سفارش یافت نشد' });
-    }
+    if (!order) return res.status(404).json({ message: 'سفارش یافت نشد' });
 
     order.status = 'Delivered';
     const updatedOrder = await order.save();
-
     res.json({ message: 'سفارش با موفقیت تحویل مشتری شد', order: updatedOrder });
   } catch (error) {
     res.status(500).json({ message: 'خطا در تحویل سفارش', error: error.message });
   }
 };
 
-// @desc    تغییر وضعیت دستی/عمومی سفارش
 exports.updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
@@ -240,21 +219,16 @@ exports.updateOrderStatus = async (req, res) => {
     }
 
     const order = await Order.findById(req.params.id);
-
-    if (!order) {
-      return res.status(404).json({ message: 'سفارش یافت نشد' });
-    }
+    if (!order) return res.status(404).json({ message: 'سفارش یافت نشد' });
 
     order.status = status;
     const updatedOrder = await order.save();
-
     res.json(updatedOrder);
   } catch (error) {
     res.status(500).json({ message: 'خطا در تغییر وضعیت سفارش', error: error.message });
   }
 };
 
-// افزودن به سبد خرید و کسر موجودی (به همراه بررسی ساعات کاری)
 exports.addToCart = async (req, res) => {
     try {
         const workingCheck = await checkIsWorkingHours();
@@ -295,7 +269,6 @@ exports.addToCart = async (req, res) => {
     }
 };
 
-// حذف از سبد خرید
 exports.removeFromCart = async (req, res) => {
     try {
         const { itemId } = req.body;
@@ -327,7 +300,6 @@ exports.removeFromCart = async (req, res) => {
     }
 };
 
-// دریافت سبد خرید فعلی
 exports.getCart = async (req, res) => {
     try {
         const cart = await Order.findOne({ customer: req.user._id, status: 'cart' })
@@ -343,7 +315,7 @@ exports.getCart = async (req, res) => {
     }
 };
 
-// نهایی سازی سفارش (به همراه بررسی ساعات کاری)
+// نهایی سازی سفارش با پشتیبانی از کد تخفیف
 exports.checkoutCart = async (req, res) => {
     try {
         const workingCheck = await checkIsWorkingHours();
@@ -351,10 +323,26 @@ exports.checkoutCart = async (req, res) => {
           return res.status(400).json({ message: workingCheck.message });
         }
 
+        const { discountCode } = req.body;
         const cart = await Order.findOne({ customer: req.user._id, status: 'cart' });
 
         if (!cart || cart.items.length === 0) {
             return res.status(400).json({ message: 'سبد خرید شما خالی است.' });
+        }
+
+        let finalPrice = cart.totalPrice;
+
+        // اعمال تخفیف در صورت ارسال کد
+        if (discountCode && discountCode.trim() !== '') {
+          const discount = await Discount.findOne({ code: discountCode.toUpperCase(), isActive: true });
+          if (!discount) {
+            return res.status(400).json({ message: 'کد تخفیف نامعتبر است.' });
+          }
+          if (new Date() > new Date(discount.expiryDate)) {
+            return res.status(400).json({ message: 'تاریخ انقضای کد تخفیف به پایان رسیده است.' });
+          }
+          const discountAmount = (cart.totalPrice * discount.discountPercent) / 100;
+          finalPrice = cart.totalPrice - discountAmount;
         }
 
         let maxPrepTime = 15;
@@ -368,6 +356,7 @@ exports.checkoutCart = async (req, res) => {
         const estimatedReadyAt = new Date(Date.now() + maxPrepTime * 60 * 1000);
 
         cart.status = 'Pending';
+        cart.totalPrice = finalPrice; // ذخیره قیمت نهایی پس از تخفیف
         cart.prepTimeMinutes = maxPrepTime;
         cart.estimatedReadyAt = estimatedReadyAt;
         
@@ -379,7 +368,6 @@ exports.checkoutCart = async (req, res) => {
     }
 };
 
-// دریافت تمام سفارشات کاربر
 exports.getMyOrders = async (req, res) => {
     try {
         const orders = await Order.find({ customer: req.user._id, status: { $ne: 'cart' } })
@@ -392,15 +380,12 @@ exports.getMyOrders = async (req, res) => {
     }
 };
 
-// لغو سفارش توسط مشتری
 exports.cancelOrderCustomer = async (req, res) => {
     try {
         const orderId = req.params.id;
         const order = await Order.findOne({ _id: orderId, customer: req.user._id });
 
-        if (!order) {
-            return res.status(404).json({ message: 'سفارش یافت نشد.' });
-        }
+        if (!order) return res.status(404).json({ message: 'سفارش یافت نشد.' });
 
         if (order.status !== 'Pending') {
             return res.status(400).json({ message: 'این سفارش وارد مرحله آماده‌سازی شده و دیگر قابل لغو نیست.' });
@@ -423,39 +408,22 @@ exports.cancelOrderCustomer = async (req, res) => {
     }
 };
 
-// دریافت گزارشات فروش
 exports.getSalesReports = async (req, res) => {
     try {
         const userRole = String(req.user.role).toLowerCase();
-        
-        if (userRole !== 'admin') {
-            return res.status(403).json({ message: 'عدم دسترسی' });
-        }
+        if (userRole !== 'admin') return res.status(403).json({ message: 'عدم دسترسی' });
 
         const now = new Date();
         const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        
         const startOfWeek = new Date(startOfDay);
         startOfWeek.setDate(startOfDay.getDate() - 7);
-        
         const startOfMonth = new Date(startOfDay);
         startOfMonth.setMonth(startOfDay.getMonth() - 1);
 
         const getStats = async (startDate) => {
             const result = await Order.aggregate([
-                { 
-                    $match: { 
-                        createdAt: { $gte: startDate }, 
-                        status: 'Delivered'
-                    } 
-                },
-                { 
-                    $group: { 
-                        _id: null, 
-                        totalSales: { $sum: '$totalPrice' }, 
-                        orderCount: { $sum: 1 } 
-                    } 
-                }
+                { $match: { createdAt: { $gte: startDate }, status: 'Delivered' } },
+                { $group: { _id: null, totalSales: { $sum: '$totalPrice' }, orderCount: { $sum: 1 } } }
             ]);
             return result.length > 0 ? result[0] : { totalSales: 0, orderCount: 0 };
         };
@@ -470,13 +438,10 @@ exports.getSalesReports = async (req, res) => {
     }
 };
 
-// دریافت تمام سفارشات سیستم
 exports.getAllOrders = async (req, res) => {
     try {
         const userRole = String(req.user.role).toLowerCase();
-        if (userRole !== 'admin') {
-            return res.status(403).json({ message: 'عدم دسترسی' });
-        }
+        if (userRole !== 'admin') return res.status(403).json({ message: 'عدم دسترسی' });
 
         const orders = await Order.find({ status: { $ne: 'cart' } })
             .populate('customer', 'name phone')
@@ -489,16 +454,13 @@ exports.getAllOrders = async (req, res) => {
     }
 };
 
-// @desc    دریافت سفارش‌های آماده تحویل برای نمایشگر عمومی سلف
-// @route   GET /api/orders/public-ready
-// @access  Public
 exports.getPublicReadyOrders = async (req, res) => {
   try {
     const orders = await Order.find({ status: 'Ready' })
       .populate('customer', 'name')
       .populate('items.menuItem', 'name')
       .sort({ updatedAt: -1 })
-      .limit(20); // نمایش ۲۰ سفارش آخر آماده
+      .limit(20);
 
     res.status(200).json(orders);
   } catch (error) {

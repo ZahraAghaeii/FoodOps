@@ -1,16 +1,18 @@
 // frontend/js/cart.js
 
+let appliedDiscountCode = ''; // ذخیره کد تخفیف معتبر
+let rawCartTotal = 0;        // ذخیره مبلغ واقعی بدون تخفیف
+
 document.addEventListener("DOMContentLoaded", () => {
     fetchCartItems();
 });
 
-// دریافت محتویات سبد خرید (وضعیت Pending) از بک‌اند
+// دریافت محتویات سبد خرید از بک‌اند
 async function fetchCartItems() {
     const token = localStorage.getItem('token');
     if (!token) return window.location.href = 'login.html';
 
     try {
-        // تغییر آدرس به API_ORDERS
         const response = await fetch(`${API_ORDERS}/cart`, {
             method: 'GET',
             headers: {
@@ -39,6 +41,7 @@ function renderCartPage(cart) {
     if (!cart.items || cart.items.length === 0) {
         cartContainer.innerHTML = '<p style="font-size: 14px; color: #888; text-align: center; padding: 20px 0;">سبد خرید شما خالی است. برای انتخاب غذا به صفحه اصلی برگردید.</p>';
         document.getElementById('totalPrice').innerText = '۰ تومان';
+        rawCartTotal = 0;
         checkoutBtn.disabled = true;
         checkoutBtn.style.opacity = "0.5";
         return;
@@ -47,6 +50,9 @@ function renderCartPage(cart) {
     // فعال کردن دکمه پرداخت
     checkoutBtn.disabled = false;
     checkoutBtn.style.opacity = "1";
+
+    // ذخیره مبلغ خام سبد خرید
+    rawCartTotal = cart.totalPrice || 0;
 
     // ساخت لیست آیتم‌ها
     cart.items.forEach(item => {
@@ -65,8 +71,58 @@ function renderCartPage(cart) {
         cartContainer.appendChild(li);
     });
 
-    // آپدیت جمع کل
-    document.getElementById('totalPrice').innerText = `${(cart.totalPrice || 0).toLocaleString('fa-IR')} تومان`;
+    // آپدیت جمع کل با مقدار امن rawCartTotal
+    document.getElementById('totalPrice').innerText = `${rawCartTotal.toLocaleString('fa-IR')} تومان`;
+}
+
+// بررسی و اعمال کد تخفیف
+async function applyDiscountCode() {
+    const codeInput = document.getElementById('discountCodeInput');
+    const msgElement = document.getElementById('discountMessage');
+    const code = codeInput ? codeInput.value.trim() : '';
+
+    if (!code) {
+        msgElement.style.color = '#dc2626';
+        msgElement.innerText = 'لطفاً یک کد تخفیف وارد کنید.';
+        return;
+    }
+
+    if (rawCartTotal <= 0) {
+        msgElement.style.color = '#dc2626';
+        msgElement.innerText = 'سبد خرید شما خالی است.';
+        return;
+    }
+
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await fetch('http://localhost:5000/api/discounts/apply', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ code, cartTotal: rawCartTotal })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            appliedDiscountCode = code;
+            msgElement.style.color = '#16a34a';
+            msgElement.innerText = `${data.message} (${data.discountPercent}% تخفیف)`;
+            // نمایش مبلغ جدید پس از تخفیف به همراه کلمه تومان
+            document.getElementById('totalPrice').innerText = `${Math.round(data.finalPrice).toLocaleString('fa-IR')} تومان`;
+        } else {
+            appliedDiscountCode = '';
+            msgElement.style.color = '#dc2626';
+            msgElement.innerText = data.message || 'کد تخفیف نامعتبر است.';
+        }
+    } catch (error) {
+        console.error('Discount error:', error);
+        msgElement.style.color = '#dc2626';
+        msgElement.innerText = 'خطا در ارتباط با سرور.';
+    }
 }
 
 // حذف آیتم و کسر از بک‌اند
@@ -75,7 +131,6 @@ async function removeItemFromCart(itemId) {
     
     const token = localStorage.getItem('token');
     try {
-        // تغییر آدرس به API_ORDERS
         const response = await fetch(`${API_ORDERS}/cart/remove`, {
             method: 'POST',
             headers: {
@@ -86,10 +141,7 @@ async function removeItemFromCart(itemId) {
         });
 
         if (response.ok) {
-            // آپدیت عدد سبد خرید در هدر
             if(typeof fetchCartCount === 'function') fetchCartCount();
-            
-            // رفرش کردن لیست صفحه
             fetchCartItems();
         } else {
             alert('خطا در حذف آیتم');
@@ -99,17 +151,18 @@ async function removeItemFromCart(itemId) {
     }
 }
 
-// نهایی سازی سفارش
+// نهایی سازی سفارش (به همراه ارسال کد تخفیف در صورت وجود)
 async function checkoutOrder() {
     const token = localStorage.getItem('token');
     
     try {
-        // تغییر آدرس به API_ORDERS
         const response = await fetch(`${API_ORDERS}/checkout`, {
             method: 'POST',
             headers: {
+                'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
-            }
+            },
+            body: JSON.stringify({ discountCode: appliedDiscountCode })
         });
 
         if (response.ok) {
@@ -123,3 +176,43 @@ async function checkoutOrder() {
         console.error('Checkout error:', error);
     }
 }
+
+// دریافت و نمایش کدهای تخفیف فعال برای مشتری در صفحه سبد خرید
+async function fetchPublicDiscounts() {
+    const token = localStorage.getItem('token');
+    const container = document.getElementById('publicDiscountsContainer');
+    if (!container) return;
+
+    try {
+        const response = await fetch('http://localhost:5000/api/discounts/public', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const discounts = await response.json();
+
+        container.innerHTML = '';
+        if (!Array.isArray(discounts) || discounts.length === 0) {
+            container.innerHTML = '<span style="font-size: 12px; color: #888;">در حال حاضر کد تخفیف فعالی وجود ندارد.</span>';
+            return;
+        }
+
+        discounts.forEach(d => {
+            const badge = document.createElement('button');
+            badge.type = 'button';
+            badge.style.cssText = 'background: #fef3c7; border: 1px solid #f59e0b; color: #92400e; padding: 4px 10px; border-radius: 20px; font-size: 12px; cursor: pointer; font-weight: bold;';
+            badge.innerHTML = `🎫 ${d.code} (${d.discountPercent}%)`;
+            badge.title = 'برای استفاده کلیک کنید';
+            badge.onclick = () => {
+                document.getElementById('discountCodeInput').value = d.code;
+            };
+            container.appendChild(badge);
+        });
+    } catch (err) {
+        console.error('خطا در دریافت کدهای تخفیف عمومی:', err);
+    }
+}
+
+// اضافه کردن فراخوانی این تابع به رویداد لود صفحه سبد خرید
+document.addEventListener("DOMContentLoaded", () => {
+    fetchCartItems();
+    fetchPublicDiscounts(); // <-- دریافت کدهای تخفیف فعال هنگام باز شدن سبد خرید
+});

@@ -16,7 +16,8 @@ app.use(express.json());
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/categories', require('./routes/categoryRoutes'));
 app.use('/api/menu', require('./routes/menuRoutes'));
-app.use('/api/orders', require('./routes/orderRoutes')); // <-- اضافه شد
+app.use('/api/orders', require('./routes/orderRoutes'));
+app.use('/api/discounts', require('./routes/discountRoutes')); // <-- روت تخفیف اضافه شد
 
 app.get('/', (req, res) => {
   res.send('Server FoodOps running smoothly!');

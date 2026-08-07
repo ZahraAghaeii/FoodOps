@@ -19,6 +19,22 @@
             <ul class="cart-items" id="cartItems">
               <p>در حال بارگذاری سبد خرید...</p>
             </ul>
+            
+            <!-- بخش کد تخفیف -->
+            <div style="margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid var(--border-color);">
+              <label style="font-weight: bold; display: block; margin-bottom: 8px;">🎫 کدهای تخفیف پیشنهادی:</label>
+              <!-- کدهای تخفیف فعال اینجا به صورت تگ‌های قابل کلیک لود می‌شوند -->
+              <div id="publicDiscountsContainer" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;">
+                <span style="font-size: 12px; color: #666;">در حال بارگذاری کدهای تخفیف...</span>
+              </div>
+
+              <div style="display: flex; gap: 10px;">
+                <input type="text" id="discountCodeInput" placeholder="کد تخفیف را وارد کنید" style="flex: 1; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; text-transform: uppercase;" />
+                <button type="button" onclick="applyDiscountCode()" style="background: var(--light-brown); color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; width: auto;">اعمال تخفیف</button>
+              </div>
+              <p id="discountMessage" style="font-size: 13px; margin-top: 6px; color: #16a34a;"></p>
+            </div>
+
             <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 18px; margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 15px;">
               <span>مبلغ قابل پرداخت:</span>
               <span id="totalPrice" style="color: var(--primary-orange);">۰ تومان</span>
