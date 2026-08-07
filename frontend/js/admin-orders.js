@@ -51,9 +51,9 @@ function renderKanbanBoard(orders) {
 
         const cardHtml = `
                     <div class="admin-order-card">
-                        <div class="card-header">
-                            <span>کد: ${order._id.slice(-5)}</span>
-                            <span>⏱️ ${dateStr}</span>
+                        <div class="card-header" style="display: block; margin-bottom: 8px;">
+                            <div>کد: ${order._id.slice(-5)}</div>
+                            <div style="margin-top: 4px;">⏱️ ${dateStr}</div>
                         </div>
                         <div class="card-customer">
                             👤 ${customerName} <br>

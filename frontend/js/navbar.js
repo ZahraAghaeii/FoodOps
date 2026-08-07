@@ -24,7 +24,7 @@ function renderDynamicSidebar() {
         <li><a href="index.html">🍽️ مشاهده منوی اصلی</a></li>
         <li><a href="admin-manage-menu.html">➕ افزودن غذا و دسته‌بندی</a></li>
         <li><a href="admin-reports.html">📊 گزارشات فروش</a></li>
-        <li><a href="admin-orders.html">📋 کانبان کلی سفارشات</a></li>
+        <li><a href="admin-orders.html">📋 مدیریت جامع سفارشات</a></li>
         <li><a href="kitchen.html">👨‍🍳 صف آشپزخانه</a></li>
         <li><a href="delivery.html">🚀 پنل تحویل سفارش</a></li>
         <li><a href="profile.html">👤 مدیریت کاربران و پروفایل</a></li>

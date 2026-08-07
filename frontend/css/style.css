@@ -270,6 +270,26 @@ button:hover, .btn-submit:hover {
 }
 
 /* ========================================== */
+/*         استایل کارت‌های کانبان ادمین       */
+/* ========================================== */
+.admin-order-card {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px !important; /* ایجاد فاصله مناسب بین کارت‌های سفارشات */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border-right: 4px solid #ccc;
+  border-left: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  font-size: 13px;
+}
+
+.admin-order-card .card-items li {
+  margin-bottom: 8px !important; /* فاصله بین آیتم‌های غذا در سفارش */
+}
+
+/* ========================================== */
 /*                سایر بخش‌ها                 */
 /* ========================================== */
 .menu-grid {
@@ -315,6 +335,7 @@ button:hover, .btn-submit:hover {
   background: #fff;
   border-radius: 8px;
   padding: 18px;
+  margin-bottom: 15px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   border-top: 5px solid #ccc;
   border-left: 1px solid var(--border-color);
