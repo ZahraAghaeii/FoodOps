@@ -488,3 +488,20 @@ exports.getAllOrders = async (req, res) => {
         res.status(500).json({ message: 'خطا در دریافت سفارشات سیستم', error: error.message });
     }
 };
+
+// @desc    دریافت سفارش‌های آماده تحویل برای نمایشگر عمومی سلف
+// @route   GET /api/orders/public-ready
+// @access  Public
+exports.getPublicReadyOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({ status: 'Ready' })
+      .populate('customer', 'name')
+      .populate('items.menuItem', 'name')
+      .sort({ updatedAt: -1 })
+      .limit(20); // نمایش ۲۰ سفارش آخر آماده
+
+    res.status(200).json(orders);
+  } catch (error) {
+    res.status(500).json({ message: 'خطا در دریافت سفارش‌های آماده', error: error.message });
+  }
+};

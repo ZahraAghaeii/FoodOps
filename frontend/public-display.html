@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FoodOps - نمایشگر سلف (سفارش‌های آماده)</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="public-display-body">
+
+  <!-- کانتینر هدر منظم برای جلوگیری از روی هم افتادن عناصر -->
+  <div class="display-header-wrapper">
+    <!-- دکمه بازگشت در سمت راست -->
+    <a href="index.html" class="back-btn-display">
+      ➔ بازگشت به منو
+    </a>
+
+    <!-- عنوان وسط‌چین -->
+    <div class="display-header" style="border: none; margin: 0; padding: 0;">
+      <h1>🔔 مانیتور اعلام آماده‌سازی سفارشات سلف</h1>
+      <p>لطفاً با ارائه کد سفارش یا نام خود جهت تحویل غذا به باجه مراجعه کنید.</p>
+    </div>
+    
+    <!-- یک تگ خالی برای توازن در سمت چپ فِلکس‌باکس -->
+    <div style="width: 130px;"></div>
+  </div>
+
+  <div id="readyGrid" class="ready-grid">
+    <div class="empty-display">در حال بارگذاری سفارش‌های آماده...</div>
+  </div>
+
+  <script src="js/public-display.js"></script>
+</body>
+</html>

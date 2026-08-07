@@ -22,6 +22,7 @@ function renderDynamicSidebar() {
     // کاربر مهمان
     menuItems = `
       <li><a href="index.html">🍽️ منوی غذاها</a></li>
+      <li><a href="public-display.html" target="_blank">📺 نمایشگر سلف (آماده‌ها)</a></li>
       <li><a href="login.html">🔑 ورود به حساب</a></li>
       <li><a href="register.html">📝 ثبت‌نام</a></li>
     `;
@@ -36,16 +37,19 @@ function renderDynamicSidebar() {
         <li><a href="admin-orders.html">📋 مدیریت جامع سفارشات</a></li>
         <li><a href="kitchen.html">👨‍🍳 صف آشپزخانه</a></li>
         <li><a href="delivery.html">🚀 پنل تحویل سفارش</a></li>
+        <li><a href="public-display.html" target="_blank">📺 نمایشگر سلف (آماده‌ها)</a></li>
         <li><a href="profile.html">👤 مدیریت کاربران و پروفایل</a></li>
       `;
     } else if (role === 'Kitchen Staff') {
       menuItems = `
         <li><a href="kitchen.html">👨‍🍳 صف آشپزخانه</a></li>
+        <li><a href="public-display.html" target="_blank">📺 نمایشگر سلف (آماده‌ها)</a></li>
         <li><a href="profile.html">👤 پروفایل من</a></li>
       `;
     } else if (role === 'Cashier') {
       menuItems = `
         <li><a href="delivery.html">🚀 پنل تحویل سفارش</a></li>
+        <li><a href="public-display.html" target="_blank">📺 نمایشگر سلف (آماده‌ها)</a></li>
         <li><a href="profile.html">👤 پروفایل من</a></li>
       `;
     } else {
@@ -59,6 +63,7 @@ function renderDynamicSidebar() {
           </a>
         </li>
         <li><a href="orders.html">📜 سفارشات من</a></li>
+        <li><a href="public-display.html" target="_blank">📺 نمایشگر سلف (آماده‌ها)</a></li>
         <li><a href="profile.html">👤 پروفایل من</a></li>
       `;
     }

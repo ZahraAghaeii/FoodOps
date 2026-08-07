@@ -16,12 +16,14 @@ const {
   getSalesReports,
   getAllOrders,
   getWorkingHours,
-  updateWorkingHours
+  updateWorkingHours,
+  getPublicReadyOrders
 } = require('../controllers/orderController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
-// روت عمومی دریافت ساعات کاری
+// روت‌های عمومی (بدون نیاز به احراز هویت)
 router.get('/working-hours', getWorkingHours);
+router.get('/public-ready', getPublicReadyOrders); // <-- روت عمومی نمایشگر سلف
 
 // تمامی روت‌های زیر نیازمند احراز هویت هستند
 router.use(protect);

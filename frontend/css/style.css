@@ -459,3 +459,124 @@ button:hover, .btn-submit:hover {
 .btn-copy:hover {
   background: var(--orange-hover);
 }
+
+/* ========================================== */
+/*         استایل‌های صفحه نمایشگر سلف        */
+/* ========================================== */
+body.public-display-body {
+  background: #1e1b18;
+  color: #fff;
+  font-family: inherit;
+  margin: 0;
+  padding: 30px;
+}
+.display-header {
+  text-align: center;
+  margin-bottom: 40px;
+  border-bottom: 3px solid var(--primary-orange);
+  padding-bottom: 20px;
+}
+.display-header h1 {
+  font-size: 38px;
+  color: var(--orange-hover);
+  margin: 0 0 10px 0;
+}
+.display-header p {
+  font-size: 18px;
+  color: #cbd5e1;
+  margin: 0;
+}
+.ready-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+.ready-card {
+  background: #27272a;
+  border: 2px solid #10b981;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  animation: pulse-border 2s infinite;
+}
+.ready-code {
+  font-size: 32px;
+  font-weight: bold;
+  color: #34d399;
+  margin-bottom: 10px;
+  font-family: monospace;
+}
+.ready-name {
+  font-size: 20px;
+  color: #f3f4f6;
+  margin-bottom: 8px;
+}
+.ready-status {
+  display: inline-block;
+  background: #065f46;
+  color: #6ee7b7;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+}
+.empty-display {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 80px;
+  font-size: 24px;
+  color: #94a3b8;
+}
+@keyframes pulse-border {
+  0% { border-color: #10b981; }
+  50% { border-color: #047857; }
+  100% { border-color: #10b981; }
+}
+
+/* اصلاح کلی هدر نمایشگر و دکمه بازگشت */
+.display-header-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 3px solid var(--primary-orange);
+  padding-bottom: 20px;
+  margin-bottom: 40px;
+  position: relative;
+  z-index: 10;
+}
+.display-header {
+  text-align: center;
+  flex: 1;
+}
+.display-header h1 {
+  font-size: 38px;
+  color: var(--orange-hover);
+  margin: 0 0 10px 0;
+}
+.display-header p {
+  font-size: 18px;
+  color: #cbd5e1;
+  margin: 0;
+}
+.back-btn-display {
+  background: rgba(217, 119, 6, 0.2);
+  border: 1px solid var(--primary-orange);
+  color: #fbbf24;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: bold;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.back-btn-display:hover {
+  background: var(--primary-orange);
+  color: #fff;
+}
