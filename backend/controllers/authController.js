@@ -1,7 +1,7 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
-// تابع کمکی برای تولید توکن JWT
+// تابع کمکی تولید توکن JWT
 const generateToken = (id) => {
   return jwt.sign(
     { id }, 
@@ -10,11 +10,21 @@ const generateToken = (id) => {
   );
 };
 
-// @desc    ثبت‌نام کاربر جدید
+// تابع کمکی تولید رمز عبور رندوم ۸ کاراکتری
+const generateRandomPassword = () => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789#@!';
+  let tempPass = '';
+  for (let i = 0; i < 8; i++) {
+    tempPass += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return tempPass;
+};
+
+// @desc    ثبت‌نام کاربر جدید (مشتریان عادی)
 // @route   POST /api/auth/register
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, phone, role } = req.body;
+    const { name, email, password, phone } = req.body;
 
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -26,7 +36,8 @@ exports.register = async (req, res) => {
       email,
       password,
       phone: phone || '',
-      role: role || 'Customer'
+      role: 'Customer',
+      isPasswordTemp: false
     });
 
     res.status(201).json({
@@ -36,7 +47,8 @@ exports.register = async (req, res) => {
         name: user.name,
         email: user.email,
         phone: user.phone,
-        role: user.role
+        role: user.role,
+        isPasswordTemp: false
       }
     });
 
@@ -58,6 +70,9 @@ exports.login = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (user && (await user.matchPassword(password))) {
+      // اطمینان از مقداردهی درست boolean
+      const isTemp = user.isPasswordTemp === true;
+
       res.json({
         token: generateToken(user._id),
         user: {
@@ -65,7 +80,8 @@ exports.login = async (req, res) => {
           name: user.name,
           email: user.email,
           phone: user.phone || '',
-          role: user.role
+          role: user.role,
+          isPasswordTemp: isTemp
         }
       });
     } else {
@@ -111,6 +127,7 @@ exports.updateProfile = async (req, res) => {
 
     if (req.body.password && req.body.password.trim() !== '') {
       user.password = req.body.password;
+      user.isPasswordTemp = false;
     }
 
     const updatedUser = await user.save();
@@ -120,11 +137,38 @@ exports.updateProfile = async (req, res) => {
       name: updatedUser.name,
       email: updatedUser.email,
       phone: updatedUser.phone,
-      role: updatedUser.role
+      role: updatedUser.role,
+      isPasswordTemp: updatedUser.isPasswordTemp
     });
   } catch (error) {
     console.error('Update Profile Error:', error);
     res.status(500).json({ message: 'خطا در بروزرسانی اطلاعات پروفایل' });
+  }
+};
+
+// @desc    تغییر رمز موقت به رمز دائمی
+// @route   POST /api/auth/change-password
+exports.changePassword = async (req, res) => {
+  try {
+    const { newPassword } = req.body;
+
+    if (!newPassword || newPassword.trim().length < 6) {
+      return res.status(400).json({ message: 'رمز عبور جدید باید حداقل ۶ کاراکتر باشد' });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'کاربر یافت نشد' });
+    }
+
+    user.password = newPassword;
+    user.isPasswordTemp = false;
+    await user.save();
+
+    res.json({ message: 'رمز عبور با موفقیت تغییر کرد' });
+  } catch (error) {
+    console.error('Change Password Error:', error);
+    res.status(500).json({ message: 'خطا در تغییر رمز عبور' });
   }
 };
 
@@ -145,8 +189,13 @@ exports.getAllUsers = async (req, res) => {
 exports.updateUserRole = async (req, res) => {
   try {
     const { role } = req.body;
-    const user = await User.findById(req.params.id);
+    
+    const allowedRoles = ['Admin', 'Kitchen Staff', 'Kitchen', 'Cashier'];
+    if (!allowedRoles.includes(role)) {
+      return res.status(400).json({ message: 'انتخاب این نقش مجاز نمی‌باشد' });
+    }
 
+    const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ message: 'کاربر مورد نظر یافت نشد' });
     }
@@ -161,33 +210,43 @@ exports.updateUserRole = async (req, res) => {
   }
 };
 
-// @desc    ثبت‌نام مستقیم پرسنل جدید توسط ادمین
+// @desc    ثبت‌نام پرسنل جدید توسط ادمین با رمز رندوم
 // @route   POST /api/auth/staff
 exports.createStaff = async (req, res) => {
   try {
-    const { name, email, password, phone, role } = req.body;
+    const { name, email, phone, role } = req.body;
+
+    const allowedRoles = ['Admin', 'Kitchen Staff', 'Kitchen', 'Cashier'];
+    if (!allowedRoles.includes(role)) {
+      return res.status(400).json({ message: 'ادمین فقط مجاز به تعریف پرسنل (ادمین، آشپزخانه، صندوق‌دار) است' });
+    }
 
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: 'کاربری با این ایمیل قبلاً ثبت‌نام کرده است' });
     }
 
+    const generatedPassword = generateRandomPassword();
+
     const newStaff = await User.create({
       name,
       email,
-      password,
+      password: generatedPassword,
       phone: phone || '',
-      role: role || 'Kitchen Staff'
+      role: role || 'Kitchen Staff',
+      isPasswordTemp: true
     });
 
     res.status(201).json({
       message: 'پرسنل جدید با موفقیت ثبت شد',
+      generatedPassword: generatedPassword,
       user: {
         _id: newStaff._id,
         name: newStaff.name,
         email: newStaff.email,
         phone: newStaff.phone,
-        role: newStaff.role
+        role: newStaff.role,
+        isPasswordTemp: true
       }
     });
   } catch (error) {
@@ -201,4 +260,3 @@ exports.createStaff = async (req, res) => {
 exports.logout = async (req, res) => {
   res.json({ message: 'خروج با موفقیت انجام شد' });
 };
-

@@ -8,7 +8,8 @@ const {
   updateProfile, 
   getAllUsers, 
   updateUserRole, 
-  createStaff 
+  createStaff,
+  changePassword
 } = require('../controllers/authController');
 
 const { protect, admin } = require('../middleware/authMiddleware');
@@ -19,6 +20,7 @@ router.post('/login', login);
 router.post('/logout', logout);
 router.get('/me', protect, getMe);
 router.put('/profile', protect, updateProfile);
+router.post('/change-password', protect, changePassword); // مسیر جدید تغییر رمز اجباری
 
 // مسیرهای مدیریتی (فقط مخصوص ادمین)
 router.get('/users', protect, admin, getAllUsers);

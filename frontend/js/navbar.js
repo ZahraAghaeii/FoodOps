@@ -1,3 +1,13 @@
+// گارد امنیتی: بررسی اجباری رمز موقت در تمام صفحات
+(function checkTempPasswordGuard() {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const currentPage = window.location.pathname.split('/').pop();
+
+  if (user && user.isPasswordTemp && currentPage !== 'change-password.html') {
+    window.location.href = 'change-password.html';
+  }
+})();
+
 function renderDynamicSidebar() {
   const sidebar = document.getElementById('main-sidebar');
   if (!sidebar) return;
@@ -19,7 +29,6 @@ function renderDynamicSidebar() {
     const role = user.role || 'Customer';
 
     if (role === 'Admin') {
-      // منوی ادمین
       menuItems = `
         <li><a href="index.html">🍽️ مشاهده منوی اصلی</a></li>
         <li><a href="admin-manage-menu.html">➕ افزودن غذا و دسته‌بندی</a></li>

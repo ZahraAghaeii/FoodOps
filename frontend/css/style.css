@@ -413,3 +413,49 @@ button:hover, .btn-submit:hover {
   background: var(--primary-orange); 
   color: #ffffff; 
 }
+
+/* ========================================== */
+/*    استایل اختصاصی نمایش رمز موقت پرسنل     */
+/* ========================================== */
+.temp-password-box {
+  display: none;
+  background: #fff8f3;
+  border: 2px dashed var(--primary-orange);
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 15px;
+  text-align: center;
+}
+
+.temp-password-value {
+  font-family: monospace;
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--orange-hover);
+  background: #fef3c7;
+  padding: 6px 14px;
+  border-radius: 6px;
+  letter-spacing: 2px;
+  display: inline-block;
+  margin: 10px 0;
+  user-select: all;
+  border: 1px solid var(--border-color);
+}
+
+.btn-copy {
+  background: var(--primary-orange);
+  color: white;
+  border: none;
+  padding: 7px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: bold;
+  margin-right: 8px;
+  transition: background 0.2s;
+  width: auto !important;
+}
+
+.btn-copy:hover {
+  background: var(--orange-hover);
+}

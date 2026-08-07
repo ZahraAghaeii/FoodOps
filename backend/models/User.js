@@ -27,6 +27,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['Customer', 'Kitchen Staff', 'Kitchen', 'Cashier', 'Admin'],
     default: 'Customer'
+  },
+  // فیلد جدید جهت تشخیص اولین ورود پرسنل و لزوم تغییر رمز
+  isPasswordTemp: {
+    type: Boolean,
+    default: false
   }
 }, { timestamps: true });
 
@@ -43,4 +48,3 @@ userSchema.methods.matchPassword = async function(enteredPassword) {
 };
 
 module.exports = mongoose.model('User', userSchema);
-

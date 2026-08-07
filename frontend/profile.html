@@ -9,10 +9,13 @@
 <body>
 
   <div class="app-container">
+    <!-- نوبار عمودی سمت راست -->
     <nav class="sidebar-nav" id="main-sidebar"></nav>
 
     <div class="main-wrapper">
       <div class="container" style="max-width: 900px;">
+        
+        <!-- ویرایش اطلاعات شخصی -->
         <div style="background: white; padding: 25px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 20px;">
           <h2>👤 ویرایش اطلاعات شخصی</h2>
           <form id="profile-form" style="margin-top: 15px;">
@@ -29,16 +32,17 @@
               <input type="text" id="prof-phone" />
             </div>
             <div class="form-group">
-              <label>رمز عبور جدید:</label>
+              <label>رمز عبور جدید (در صورت عدم تغییر خالی بگذارید):</label>
               <input type="password" id="prof-password" placeholder="******" />
             </div>
             <button type="submit" style="width: auto;">ذخیره تغییرات</button>
           </form>
         </div>
 
-        <!-- بخش ثبت پرسنل مخصوص ادمین -->
+        <!-- ثبت پرسنل جدید مخصوص ادمین -->
         <div id="admin-create-staff-section" style="display: none; background: white; padding: 25px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 20px;">
           <h2>➕ ثبت‌نام پرسنل جدید</h2>
+          <p style="font-size: 12px; color: #666; margin-bottom: 10px;">رمز عبور به صورت خودکار جنیریت شده و پس از ثبت به شما نمایش داده می‌شود.</p>
           <form id="create-staff-form" style="margin-top: 15px;">
             <div class="form-group">
               <label>نام کامل:</label>
@@ -49,21 +53,32 @@
               <input type="email" id="staff-email" required />
             </div>
             <div class="form-group">
-              <label>رمز عبور اولیه:</label>
-              <input type="password" id="staff-password" required />
+              <label>شماره تلفن:</label>
+              <input type="text" id="staff-phone" placeholder="09123456789" />
             </div>
             <div class="form-group">
               <label>تعیین نقش:</label>
               <select id="staff-role" required>
                 <option value="Kitchen Staff">مسئول آشپزخانه (Kitchen Staff)</option>
                 <option value="Cashier">صندوق‌دار (Cashier)</option>
+                <option value="Admin">مدیر سامانه (Admin)</option>
               </select>
             </div>
-            <button type="submit" style="width: auto;">ثبت پرسنل جدید</button>
+            <button type="submit" style="width: auto;">ثبت پرسنل و ساخت رمز رندوم</button>
           </form>
+
+          <!-- باکس نمایش رمز تولیدشده رندوم برای کپی راحتر -->
+          <div id="temp-password-box" class="temp-password-box">
+            <p style="font-size: 13px; color: var(--dark-brown); font-weight: bold;">✅ پرسنل جدید با موفقیت ایجاد شد!</p>
+            <p style="font-size: 12px; color: #666; margin-top: 4px;">رمز عبور موقت تولیدشده:</p>
+            <div>
+              <span id="temp-pass-val" class="temp-password-value">---</span>
+              <button type="button" class="btn-copy" onclick="copyTempPassword()">📋 کپی رمز</button>
+            </div>
+          </div>
         </div>
 
-        <!-- بخش لیست کاربران مخصوص ادمین -->
+        <!-- لیست کاربران مخصوص ادمین -->
         <div id="admin-users-list-section" style="display: none; background: white; padding: 25px; border-radius: 10px; border: 1px solid var(--border-color);">
           <h2>👥 مدیریت کاربران</h2>
           <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
@@ -71,15 +86,17 @@
               <tr style="background: #f8f9fa;">
                 <th style="padding: 10px;">نام</th>
                 <th style="padding: 10px;">ایمیل</th>
+                <th style="padding: 10px;">شماره تلفن</th>
                 <th style="padding: 10px;">نقش فعلی</th>
                 <th style="padding: 10px;">تغییر نقش</th>
               </tr>
             </thead>
             <tbody id="users-table-body">
-              <tr><td colspan="4">در حال دریافت کاربران...</td></tr>
+              <tr><td colspan="5">در حال دریافت کاربران...</td></tr>
             </tbody>
           </table>
         </div>
+
       </div>
     </div>
   </div>

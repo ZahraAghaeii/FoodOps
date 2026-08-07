@@ -9,10 +9,8 @@ window.onload = () => {
     return;
   }
 
-  // دریافت اطلاعات پروفایل جاری
   fetchProfile();
 
-  // کنترل دسترسی بخش‌های مدیریتی ادمین
   const userRole = String(user.role || user.type || '').toLowerCase().trim();
   if (userRole.includes('admin')) {
     const staffSec = document.getElementById('admin-create-staff-section');
@@ -25,7 +23,6 @@ window.onload = () => {
   }
 };
 
-// دریافت اطلاعات کاربر لاگین شده
 async function fetchProfile() {
   const token = localStorage.getItem('token');
   try {
@@ -44,7 +41,6 @@ async function fetchProfile() {
   }
 }
 
-// ثبت ویرایش پروفایل شخصی
 document.getElementById('profile-form')?.addEventListener('submit', async (e) => {
   e.preventDefault();
   const token = localStorage.getItem('token');
@@ -84,7 +80,6 @@ document.getElementById('profile-form')?.addEventListener('submit', async (e) =>
   }
 });
 
-// دریافت لیست کاربران جهت نمایش به ادمین
 async function fetchAllUsers() {
   const token = localStorage.getItem('token');
   try {
@@ -129,7 +124,6 @@ async function fetchAllUsers() {
   }
 }
 
-// تغییر نقش یک کاربر توسط ادمین
 async function changeUserRole(userId, newRole) {
   const token = localStorage.getItem('token');
   try {
@@ -155,7 +149,7 @@ async function changeUserRole(userId, newRole) {
   }
 }
 
-// ثبت‌نام پرسنل جدید توسط ادمین
+// ثبت پرسنل و نمایش رمز موقت در باکس اختصاصی روی صفحه
 document.getElementById('create-staff-form')?.addEventListener('submit', async (e) => {
   e.preventDefault();
   const token = localStorage.getItem('token');
@@ -164,7 +158,6 @@ document.getElementById('create-staff-form')?.addEventListener('submit', async (
     name: document.getElementById('staff-name').value,
     email: document.getElementById('staff-email').value,
     phone: document.getElementById('staff-phone').value,
-    password: document.getElementById('staff-password').value,
     role: document.getElementById('staff-role').value
   };
 
@@ -180,7 +173,15 @@ document.getElementById('create-staff-form')?.addEventListener('submit', async (
 
     const data = await res.json();
     if (res.ok) {
-      alert('پرسنل جدید با موفقیت ثبت شد!');
+      // نمایش باکس رمز عبور موقت تولید شده
+      const box = document.getElementById('temp-password-box');
+      const val = document.getElementById('temp-pass-val');
+      
+      if (box && val) {
+        val.innerText = data.generatedPassword;
+        box.style.display = 'block';
+      }
+
       document.getElementById('create-staff-form').reset();
       fetchAllUsers();
     } else {
@@ -191,3 +192,12 @@ document.getElementById('create-staff-form')?.addEventListener('submit', async (
     alert('خطا در ارتباط با سرور');
   }
 });
+
+// تابع کپی کردن رمز موقت در کلپ‌بورد
+function copyTempPassword() {
+  const val = document.getElementById('temp-pass-val')?.innerText;
+  if (val && val !== '---') {
+    navigator.clipboard.writeText(val);
+    alert('رمز عبور موقت در حافظه کپی شد! 📋');
+  }
+}
