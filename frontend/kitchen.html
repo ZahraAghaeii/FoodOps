@@ -3,22 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>مدیریت صف آشپزخانه | FoodOps</title>
+  <title>FoodOps - صف آشپزخانه</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-  <div class="container">
-    <div class="kitchen-header">
-      <h2>👨‍🍳 داشبورد صف آشپزخانه (FoodOps)</h2>
-      <a href="index.html" style="text-decoration: none; color: #555; font-weight: bold;">⬅️ بازگشت به منو</a>
-    </div>
+  <div class="app-container">
+    <nav class="sidebar-nav" id="main-sidebar"></nav>
 
-    <div id="kitchenOrdersContainer" class="orders-grid">
-      <p>در حال دریافت سفارش‌ها...</p>
+    <div class="main-wrapper">
+      <div class="container">
+        <div class="kitchen-header">
+          <h2>👨‍🍳 داشبورد صف آشپزخانه</h2>
+        </div>
+        <div id="kitchenOrdersContainer" class="orders-grid">
+          <p>در حال دریافت سفارش‌ها...</p>
+        </div>
+      </div>
     </div>
   </div>
 
+  <script src="js/navbar.js"></script>
   <script src="js/kitchen.js"></script>
 </body>
 </html>

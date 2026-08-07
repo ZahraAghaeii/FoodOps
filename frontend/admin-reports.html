@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FoodOps - گزارشات فروش سیستم</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <nav class="sidebar-nav" id="main-sidebar"></nav>
+
+    <div class="main-wrapper">
+      <div class="container">
+        <div style="background: white; padding: 25px; border-radius: 10px; border: 1px solid var(--border-color);">
+          <h2>📊 گزارشات فروش سیستم</h2>
+          <div style="display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap;">
+            
+            <div style="flex: 1; background: #fff8f3; border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; text-align: center; border-top: 4px solid #3498db; min-width: 200px;">
+              <h3 style="color: var(--dark-brown); font-size: 15px; margin-bottom: 10px;">امروز (۲۴ ساعت اخیر)</h3>
+              <p style="font-size: 22px; font-weight: bold; color: var(--primary-orange);" id="dailySales">۰ تومان</p>
+              <p style="font-size: 13px; color: #7f8c8d; margin-top: 5px;" id="dailyCount">تعداد سفارش: ۰</p>
+            </div>
+
+            <div style="flex: 1; background: #fff8f3; border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; text-align: center; border-top: 4px solid #f39c12; min-width: 200px;">
+              <h3 style="color: var(--dark-brown); font-size: 15px; margin-bottom: 10px;">هفتگی (۷ روز اخیر)</h3>
+              <p style="font-size: 22px; font-weight: bold; color: var(--primary-orange);" id="weeklySales">۰ تومان</p>
+              <p style="font-size: 13px; color: #7f8c8d; margin-top: 5px;" id="weeklyCount">تعداد سفارش: ۰</p>
+            </div>
+
+            <div style="flex: 1; background: #fff8f3; border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; text-align: center; border-top: 4px solid #9b59b6; min-width: 200px;">
+              <h3 style="color: var(--dark-brown); font-size: 15px; margin-bottom: 10px;">ماهانه (۳۰ روز اخیر)</h3>
+              <p style="font-size: 22px; font-weight: bold; color: var(--primary-orange);" id="monthlySales">۰ تومان</p>
+              <p style="font-size: 13px; color: #7f8c8d; margin-top: 5px;" id="monthlyCount">تعداد سفارش: ۰</p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/navbar.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchAdminReports();
+    });
+  </script>
+</body>
+</html>

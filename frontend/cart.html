@@ -1,269 +1,43 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FoodOps - سبد خرید</title>
-    <link rel="stylesheet" href="css/style.css">
-    <style>
-        /* ========================================== */
-        /*              ساختار اصلی صفحه              */
-        /* ========================================== */
-        .cart-layout {
-            display: flex;
-            gap: 20px;
-            align-items: flex-start;
-        }
-
-        /* در صفحات کوچکتر (موبایل) زیر هم قرار بگیرند */
-        @media (max-width: 768px) {
-            .cart-layout {
-                flex-direction: column;
-            }
-
-            .cart-section,
-            .tracking-actions {
-                width: 100%;
-            }
-        }
-
-        /* ========================================== */
-        /*               بخش سبد خرید (۷۰٪)           */
-        /* ========================================== */
-        .cart-section {
-            flex: 7;
-            /* اختصاص ۷۰ درصد عرض */
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        }
-
-        .cart-section h2 {
-            font-size: 19px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #f0f0f0;
-            padding-bottom: 12px;
-            color: #2c3e50;
-        }
-
-        .cart-items {
-            list-style: none;
-            margin-bottom: 20px;
-        }
-
-        .cart-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            margin-bottom: 12px;
-            background: #fdfefe;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .cart-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
-        }
-
-        .cart-item-title {
-            flex: 2;
-            font-weight: 900;
-            color: #2c3e50;
-            font-size: 16px;
-        }
-
-        .cart-item-qty {
-            font-weight: bold;
-            color: #d35400;
-            background: #fdebd0;
-            padding: 5px 12px;
-            border-radius: 15px;
-            font-size: 14px;
-            text-align: center;
-        }
-
-        .cart-item-price {
-            flex: 1;
-            text-align: left;
-            color: #27ae60;
-            font-weight: 900;
-            font-size: 16px;
-            margin: 0 15px;
-        }
-
-        .btn-remove {
-            background: #ff4d4d;
-            color: white;
-            border: none;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            transition: background 0.3s, transform 0.2s;
-        }
-
-        .btn-remove:hover {
-            background: #c0392b;
-            transform: scale(1.1);
-        }
-
-        .cart-total {
-            font-weight: bold;
-            font-size: 18px;
-            margin-top: 25px;
-            display: flex;
-            justify-content: space-between;
-            background: #2c3e50;
-            color: white;
-            padding: 18px 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(44, 62, 80, 0.2);
-        }
-
-        .cart-total span:last-child {
-            color: #f1c40f;
-            font-size: 19px;
-        }
-
-        .btn-checkout {
-            background: #27ae60;
-            color: white;
-            border: none;
-            width: 100%;
-            padding: 16px;
-            border-radius: 8px;
-            font-weight: bold;
-            margin-top: 15px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background 0.3s, transform 0.1s;
-        }
-
-        .btn-checkout:hover:not([disabled]) {
-            background: #219150;
-            transform: translateY(-1px);
-        }
-
-        /* ========================================== */
-        /*          دکمه‌های پیگیری (۳۰٪ سمت چپ)      */
-        /* ========================================== */
-        .tracking-actions {
-            flex: 3;
-            /* اختصاص ۳۰ درصد عرض */
-            display: flex;
-            flex-direction: column;
-            /* چیدمان زیر هم */
-            gap: 15px;
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        }
-
-        .tracking-actions h3 {
-            font-size: 16px;
-            color: #2c3e50;
-            margin-bottom: 5px;
-            border-bottom: 2px solid #f0f0f0;
-            padding-bottom: 10px;
-            text-align: center;
-        }
-
-        .btn-track {
-            padding: 12px 15px;
-            border: 1px solid transparent;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 14px;
-            transition: all 0.2s ease;
-            text-align: center;
-        }
-
-        .btn-pending {
-            background-color: #fdebd0;
-            color: #d35400;
-            border-color: #fad7a1;
-        }
-
-        .btn-pending:hover {
-            background-color: #f8c471;
-            transform: translateY(-2px);
-        }
-
-        .btn-history {
-            background-color: #f1f5f9;
-            color: #475569;
-            border-color: #cbd5e1;
-        }
-
-        .btn-history:hover {
-            background-color: #e2e8f0;
-            color: #1e293b;
-            transform: translateY(-2px);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FoodOps - سبد خرید</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
 
-    <header>
-        <h1 onclick="window.location.href='index.html'" style="cursor: pointer;">🍽️ سیستم سفارش آنلاین FoodOps</h1>
-        <div class="header-right">
-            <ul class="navbar">
-                <li id="cart-nav-item" style="display: block;">
-                    <a href="cart.html">🛒 سبد خرید <span id="cart-count">0</span></a>
-                </li>
+  <div class="app-container">
+    <nav class="sidebar-nav" id="main-sidebar"></nav>
+
+    <div class="main-wrapper">
+      <div class="container">
+        <h2>🛒 سبد خرید فعلی شما</h2>
+        <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+          <div style="flex: 2; background: white; padding: 20px; border-radius: 10px; border: 1px solid var(--border-color);">
+            <ul class="cart-items" id="cartItems">
+              <p>در حال بارگذاری سبد خرید...</p>
             </ul>
-            <div class="user-info">
-                <span id="userName">در حال بارگذاری...</span>
-                <button class="btn-logout" onclick="logout()">خروج</button>
+            <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 18px; margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+              <span>مبلغ قابل پرداخت:</span>
+              <span id="totalPrice" style="color: var(--primary-orange);">۰ تومان</span>
             </div>
+            <button onclick="checkoutOrder()" id="checkoutBtn" disabled style="margin-top: 20px;">✅ تایید و ارسال به آشپزخانه</button>
+          </div>
+
+          <div style="flex: 1; background: white; padding: 20px; border-radius: 10px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px; height: fit-content;">
+            <h3>پیگیری سفارشات</h3>
+            <button onclick="window.location.href='orders.html?tab=pending'">⏳ سفارشات در حال انجام</button>
+            <button onclick="window.location.href='orders.html?tab=history'" style="background-color: var(--light-brown);">📜 تاریخچه کلی سفارشات</button>
+          </div>
         </div>
-    </header>
-
-    <!-- بنر صفحه اصلی -->
-    <div class="hero-banner">
-        <div class="hero-overlay"></div>
+      </div>
     </div>
+  </div>
 
-    <div class="container">
-        <div class="cart-layout">
-            <!-- محتوای سبد خرید (۷۰ درصد - سمت راست) -->
-            <div class="cart-section">
-                <h2>سبد خرید فعلی شما</h2>
-                <ul class="cart-items" id="cartItems">
-                    <p style="font-size: 13px; color: #888;">در حال دریافت اطلاعات از سرور...</p>
-                </ul>
-                <div class="cart-total">
-                    <span>مبلغ قابل پرداخت:</span>
-                    <span id="totalPrice">۰ تومان</span>
-                </div>
-                <button class="btn-checkout" onclick="checkoutOrder()" id="checkoutBtn" disabled style="opacity: 0.5;">✅
-                    تایید و ارسال به آشپزخانه</button>
-            </div>
-
-            <!-- دکمه‌های پیگیری و تاریخچه (۳۰ درصد - سمت چپ) -->
-            <div class="tracking-actions">
-                <h3>مدیریت سفارشات</h3>
-                <button class="btn-track btn-pending" onclick="window.location.href='orders.html?tab=pending'">⏳ پیگیری
-                    سفارشات در حال انجام</button>
-                <button class="btn-track btn-history" onclick="window.location.href='orders.html?tab=history'">📜
-                    تاریخچه کلی سفارشات</button>
-            </div>
-        </div>
-
-    </div>
-
-    <script src="js/app.js"></script>
-    <script src="js/cart.js"></script>
+  <script src="js/navbar.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/cart.js"></script>
 </body>
-
 </html>

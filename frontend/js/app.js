@@ -20,175 +20,10 @@ window.onload = () => {
     userNameElem.innerText = `خوش آمدید، ${user.name}`;
   }
 
-  // افزودن دکمه‌های مدیریتی براساس نقش کاربر
-  renderKitchenButton(user);
-  renderDeliveryButton(user);
-  renderAdminOrdersButton(user); // دکمه جدید برای مدیریت کل سفارشات
-  renderAdminPanels(user); // نمایش/مخفی‌سازی پنل‌های ادمین و فراخوانی گزارشات
-
   fetchMenu();
   fetchCategories();
   fetchCartCount();
 };
-
-// کنترل نمایش بخش‌های مدیریت (فقط برای ادمین)
-function renderAdminPanels(user) {
-  if (!user) return;
-
-  const userRole = String(user.role || user.type || '').toLowerCase().trim();
-  const isAdmin = userRole.includes('admin');
-
-  const catSection = document.getElementById('admin-category-section');
-  const menuSection = document.getElementById('admin-menu-section');
-  const reportsSection = document.getElementById('adminReportsSection');
-
-  if (catSection) catSection.style.display = isAdmin ? 'block' : 'none';
-  if (menuSection) menuSection.style.display = isAdmin ? 'block' : 'none';
-
-  // نمایش دادن باکس گزارشات و دریافت اطلاعات فقط برای ادمین
-  if (reportsSection) {
-    if (isAdmin) {
-      reportsSection.style.display = 'block';
-      fetchAdminReports();
-    } else {
-      reportsSection.style.display = 'none';
-    }
-  }
-}
-
-// نمایش دکمه مدیریت کل سفارشات (فقط برای ادمین)
-function renderAdminOrdersButton(user) {
-  if (!user) return;
-
-  const userRole = String(user.role || user.type || '').toLowerCase().trim();
-  const isAdmin = userRole.includes('admin');
-
-  if (isAdmin) {
-    if (document.getElementById('adminOrdersNavBtn')) return;
-
-    const adminOrdersBtn = document.createElement('a');
-    adminOrdersBtn.id = 'adminOrdersNavBtn';
-    adminOrdersBtn.href = 'admin-orders.html';
-    adminOrdersBtn.innerText = '📋 مدیریت کل سفارشات';
-    adminOrdersBtn.style.cssText = `
-      background-color: #8e44ad;
-      color: white;
-      padding: 6px 14px;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: bold;
-      font-size: 13px;
-      margin: 0 5px;
-      display: inline-block;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-      transition: background 0.2s;
-      cursor: pointer;
-    `;
-
-    adminOrdersBtn.onmouseover = () => adminOrdersBtn.style.backgroundColor = '#732d91';
-    adminOrdersBtn.onmouseout = () => adminOrdersBtn.style.backgroundColor = '#8e44ad';
-
-    injectHeaderBtn(adminOrdersBtn);
-  }
-}
-
-// نمایش مشروط دکمه صف آشپزخانه برای نقش‌های مجاز
-function renderKitchenButton(user) {
-  if (!user) return;
-
-  const userRole = String(user.role || user.type || '').toLowerCase().trim();
-
-  const isAllowed = userRole.includes('kitchen') ||
-    userRole.includes('staff') ||
-    userRole.includes('admin') ||
-    userRole.includes('cook') ||
-    userRole.includes('chef');
-
-  if (isAllowed) {
-    if (document.getElementById('kitchenNavBtn')) return;
-
-    const kitchenBtn = document.createElement('a');
-    kitchenBtn.id = 'kitchenNavBtn';
-    kitchenBtn.href = 'kitchen.html';
-    kitchenBtn.innerText = '👨‍🍳 صف آشپزخانه';
-    kitchenBtn.style.cssText = `
-      background-color: #ff9800;
-      color: white;
-      padding: 6px 14px;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: bold;
-      font-size: 13px;
-      margin: 0 5px;
-      display: inline-block;
-      box-shadow: 0 2px 4px rgba(83, 70, 70, 0.2);
-      transition: background 0.2s;
-      cursor: pointer;
-    `;
-
-    kitchenBtn.onmouseover = () => kitchenBtn.style.backgroundColor = '#e67e22';
-    kitchenBtn.onmouseout = () => kitchenBtn.style.backgroundColor = '#ff9800';
-
-    injectHeaderBtn(kitchenBtn);
-  }
-}
-
-// نمایش مشروط دکمه پنل تحویل برای صندوق‌دار (Cashier) و ادمین (Admin)
-function renderDeliveryButton(user) {
-  if (!user) return;
-
-  const userRole = String(user.role || user.type || '').toLowerCase().trim();
-
-  const isAllowed = userRole.includes('cashier') ||
-    userRole.includes('admin') ||
-    userRole.includes('delivery');
-
-  if (isAllowed) {
-    if (document.getElementById('deliveryNavBtn')) return;
-
-    const deliveryBtn = document.createElement('a');
-    deliveryBtn.id = 'deliveryNavBtn';
-    deliveryBtn.href = 'delivery.html';
-    deliveryBtn.innerText = '📦 تحویل سفارشات';
-    deliveryBtn.style.cssText = `
-      background-color: #27ae60;
-      color: white;
-      padding: 6px 14px;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: bold;
-      font-size: 13px;
-      margin: 0 5px;
-      display: inline-block;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-      transition: background 0.2s;
-      cursor: pointer;
-    `;
-
-    deliveryBtn.onmouseover = () => deliveryBtn.style.backgroundColor = '#219150';
-    deliveryBtn.onmouseout = () => deliveryBtn.style.backgroundColor = '#27ae60';
-
-    injectHeaderBtn(deliveryBtn);
-  }
-}
-
-// تابع کمکی برای تزریق دکمه‌ها در هدر پیش از دکمه خروج/نام کاربر
-function injectHeaderBtn(buttonElem) {
-  const logoutBtn = document.querySelector('button[onclick*="logout"]') ||
-    document.getElementById('logoutBtn') ||
-    document.querySelector('.btn-danger') ||
-    document.querySelector('button');
-
-  const userNameElem = document.getElementById('userName');
-
-  if (logoutBtn && logoutBtn.parentNode) {
-    logoutBtn.parentNode.insertBefore(buttonElem, logoutBtn);
-  } else if (userNameElem && userNameElem.parentNode) {
-    userNameElem.parentNode.insertBefore(buttonElem, userNameElem);
-  } else {
-    document.body.prepend(buttonElem);
-  }
-}
 
 // خروج از حساب کاربری
 function logout() {
@@ -279,7 +114,7 @@ function handleSearchInput() {
   applyFilters();
 }
 
-// رندر کردن غذاها در گرید فرانت‌اند (شامل نمایش تصویر اختصاصی ادمین و کنترلرهای تعداد)
+// رندر کردن غذاها در گرید فرانت‌اند
 function renderMenuGrid(items) {
   const menuGrid = document.getElementById('menuGrid');
   if (!menuGrid) return;
@@ -549,7 +384,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// Listenerها برای فرم‌های ادمین (خواندن خودکار نام عکس از لپ‌تاپ)
+// Listenerها برای فرم‌های ثبت دسته‌بندی و غذا (در صفحه admin-manage-menu.html)
 document.addEventListener('DOMContentLoaded', () => {
 
   // ۱. ثبت دسته‌بندی جدید
@@ -593,7 +428,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ۲. ثبت غذای جدید (تبدیل خودکار فایل انتخابی به مسیر images/...)
+  // ۲. ثبت غذای جدید
   const addMenuForm = document.getElementById('add-menu-form');
   if (addMenuForm) {
     addMenuForm.addEventListener('submit', async (e) => {
@@ -609,7 +444,6 @@ document.addEventListener('DOMContentLoaded', () => {
       let imagePath = '';
 
       if (fileInput && fileInput.files && fileInput.files[0]) {
-        // نام فایل انتخابی از لپ‌تاپ را می‌خواند و مسیر images/ را به آن اضافه می‌کند
         const fileName = fileInput.files[0].name;
         imagePath = `images/${fileName}`;
       }
@@ -619,7 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
         description: document.getElementById('menu-desc').value,
         price: Number(document.getElementById('menu-price').value),
         stock: Number(document.getElementById('menu-stock').value || 10),
-        imageUrl: imagePath, // ذخیره مسیر خودکار عکس
+        imageUrl: imagePath,
         category: document.getElementById('menu-category').value,
         isAvailable: true
       };
@@ -639,7 +473,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (response.ok) {
           alert('غذا با موفقیت به منو اضافه شد!');
           addMenuForm.reset();
-          fetchMenu();
         } else {
           alert(`خطا: ${data.message || 'مشکلی در ثبت غذا پیش آمد'}`);
         }
@@ -697,7 +530,6 @@ async function fetchCartCount() {
   const user = JSON.parse(userStr);
   const userRole = String(user.role || user.type || '').toLowerCase().trim();
 
-  // فقط برای مشتریان سبد خرید را چک کن
   if (userRole !== 'customer') return;
 
   try {
@@ -723,7 +555,7 @@ async function fetchCartCount() {
   }
 }
 
-// دریافت و نمایش گزارشات فروش ادمین
+// دریافت و نمایش گزارشات فروش ادمین (در صفحه admin-reports.html)
 async function fetchAdminReports() {
   const token = localStorage.getItem('token');
   if (!token) return;
@@ -739,17 +571,24 @@ async function fetchAdminReports() {
     if (response.ok) {
       const data = await response.json();
 
+      const dailySalesElem = document.getElementById('dailySales');
+      const dailyCountElem = document.getElementById('dailyCount');
+      const weeklySalesElem = document.getElementById('weeklySales');
+      const weeklyCountElem = document.getElementById('weeklyCount');
+      const monthlySalesElem = document.getElementById('monthlySales');
+      const monthlyCountElem = document.getElementById('monthlyCount');
+
       // آپدیت گزارش روزانه
-      document.getElementById('dailySales').innerText = `${(data.daily?.totalSales || 0).toLocaleString('fa-IR')} تومان`;
-      document.getElementById('dailyCount').innerText = `تعداد سفارش: ${data.daily?.orderCount || 0}`;
+      if (dailySalesElem) dailySalesElem.innerText = `${(data.daily?.totalSales || 0).toLocaleString('fa-IR')} تومان`;
+      if (dailyCountElem) dailyCountElem.innerText = `تعداد سفارش: ${data.daily?.orderCount || 0}`;
 
       // آپدیت گزارش هفتگی
-      document.getElementById('weeklySales').innerText = `${(data.weekly?.totalSales || 0).toLocaleString('fa-IR')} تومان`;
-      document.getElementById('weeklyCount').innerText = `تعداد سفارش: ${data.weekly?.orderCount || 0}`;
+      if (weeklySalesElem) weeklySalesElem.innerText = `${(data.weekly?.totalSales || 0).toLocaleString('fa-IR')} تومان`;
+      if (weeklyCountElem) weeklyCountElem.innerText = `تعداد سفارش: ${data.weekly?.orderCount || 0}`;
 
       // آپدیت گزارش ماهانه
-      document.getElementById('monthlySales').innerText = `${(data.monthly?.totalSales || 0).toLocaleString('fa-IR')} تومان`;
-      document.getElementById('monthlyCount').innerText = `تعداد سفارش: ${data.monthly?.orderCount || 0}`;
+      if (monthlySalesElem) monthlySalesElem.innerText = `${(data.monthly?.totalSales || 0).toLocaleString('fa-IR')} تومان`;
+      if (monthlyCountElem) monthlyCountElem.innerText = `تعداد سفارش: ${data.monthly?.orderCount || 0}`;
     } else {
       console.error('خطا در دریافت گزارشات از سرور');
     }

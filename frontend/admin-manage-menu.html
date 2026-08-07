@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FoodOps - مدیریت منو و دسته‌بندی</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <nav class="sidebar-nav" id="main-sidebar"></nav>
+
+    <div class="main-wrapper">
+      <div class="container" style="max-width: 900px;">
+        
+        <!-- فرم ثبت دسته‌بندی جدید -->
+        <div style="background: white; padding: 25px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 25px;">
+          <h2>📂 افزودن دسته‌بندی جدید</h2>
+          <form id="add-category-form" class="admin-form" style="grid-template-columns: 1fr auto; margin-top: 15px;">
+            <input type="text" id="category-name" placeholder="نام دسته‌بندی (مثلاً نوشیدنی، پیش‌غذا)" required />
+            <button type="submit" class="btn-submit-cat" style="width: auto;">ثبت دسته‌بندی</button>
+          </form>
+        </div>
+
+        <!-- فرم ثبت غذای جدید -->
+        <div style="background: white; padding: 25px; border-radius: 10px; border: 1px solid var(--border-color);">
+          <h2>➕ افزودن غذای جدید به منو</h2>
+          <form id="add-menu-form" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
+            <div class="form-group">
+              <label>نام غذا:</label>
+              <input type="text" id="menu-name" placeholder="نام غذا (مثلاً پیتزا پپرونی)" required />
+            </div>
+            <div class="form-group">
+              <label>توضیحات غذا:</label>
+              <input type="text" id="menu-desc" placeholder="توضیحات کوتاه" required />
+            </div>
+            <div style="display: flex; gap: 15px;">
+              <div class="form-group" style="flex: 1;">
+                <label>قیمت (تومان):</label>
+                <input type="number" id="menu-price" placeholder="قیمت" required />
+              </div>
+              <div class="form-group" style="flex: 1;">
+                <label>تعداد موجودی:</label>
+                <input type="number" id="menu-stock" placeholder="موجودی" min="0" value="10" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>عکس غذا:</label>
+              <input type="file" id="menu-image-file" accept="image/*" />
+            </div>
+            <div class="form-group">
+              <label>انتخاب دسته‌بندی:</label>
+              <select id="menu-category" required>
+                <option value="">در حال بارگذاری دسته‌بندی‌ها...</option>
+              </select>
+            </div>
+            <button type="submit" class="btn-submit-food" style="width: 100%;">ثبت غذا در منو</button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="js/navbar.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchCategories();
+    });
+  </script>
+</body>
+</html>

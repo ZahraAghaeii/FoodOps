@@ -4,52 +4,49 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FoodOps - ثبت‌نام حساب جدید</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, sans-serif; }
-    body { background-color: #f4f6f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-    .auth-card { background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
-    h2 { margin-bottom: 20px; color: #333; }
-    .form-group { margin-bottom: 15px; text-align: right; }
-    label { display: block; margin-bottom: 5px; font-size: 14px; color: #555; }
-    input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
-    button { width: 100%; padding: 12px; background-color: #27ae60; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-    button:hover { background-color: #219150; }
-    .switch-link { margin-top: 20px; font-size: 14px; color: #666; }
-    .switch-link a { color: #2980b9; text-decoration: none; font-weight: bold; }
-    .switch-link a:hover { text-decoration: underline; }
-  </style>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-  <div class="auth-card">
-    <h2>ثبت‌نام کاربر جدید</h2>
-    <form id="registerForm">
-      <div class="form-group">
-        <label>نام و نام خانوادگی:</label>
-        <input type="text" id="regName" required placeholder="مثال: علی محمدی">
+  <div class="auth-wrapper">
+    <div class="auth-split-card">
+      <!-- سمت راست: عکس -->
+      <div class="auth-image-side">
+        <img src="images/loginPage.png" alt="FoodOps Register">
       </div>
-      <div class="form-group">
-        <label>ایمیل:</label>
-        <input type="email" id="regEmail" required placeholder="example@gmail.com">
-      </div>
-      <div class="form-group">
-        <label>رمز عبور:</label>
-        <input type="password" id="regPassword" required placeholder="******">
-      </div>
-      <div class="form-group">
-        <label>نقش کاربر:</label>
-        <select id="regRole">
-          <option value="Customer">مشتری (Customer)</option>
-          <option value="Kitchen Staff">پرسنل آشپزخانه (Kitchen Staff)</option>
-          <option value="Cashier">صندوق‌دار (Cashier)</option>
-          <option value="Admin">مدیر (Admin)</option>
-        </select>
-      </div>
-      <button type="submit">ثبت‌نام</button>
-    </form>
 
-    <div class="switch-link">
-      قبلاً ثبت‌نام کرده‌اید؟ <a href="login.html">وارد شوید</a>
+      <!-- سمت چپ: فرم ثبت نام -->
+      <div class="auth-form-side">
+        <h2>ثبت‌نام کاربر جدید</h2>
+        <form id="registerForm">
+          <div class="form-group">
+            <label>نام و نام خانوادگی:</label>
+            <input type="text" id="regName" required placeholder="مثال: علی محمدی">
+          </div>
+          <div class="form-group">
+            <label>ایمیل:</label>
+            <input type="email" id="regEmail" required placeholder="example@gmail.com">
+          </div>
+          <div class="form-group">
+            <label>رمز عبور:</label>
+            <input type="password" id="regPassword" required placeholder="******">
+          </div>
+          <div class="form-group">
+            <label>نقش کاربر:</label>
+            <select id="regRole">
+              <option value="Customer">مشتری (Customer)</option>
+              <option value="Kitchen Staff">پرسنل آشپزخانه (Kitchen Staff)</option>
+              <option value="Cashier">صندوق‌دار (Cashier)</option>
+              <option value="Admin">مدیر (Admin)</option>
+            </select>
+          </div>
+          <button type="submit" class="btn-submit">ایجاد حساب کاربری</button>
+        </form>
+
+        <div class="switch-link">
+          قبلاً ثبت‌نام کرده‌اید؟ <a href="login.html">وارد شوید</a>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -75,7 +72,7 @@
           localStorage.setItem('token', data.token);
           localStorage.setItem('user', JSON.stringify(data.user));
           alert('ثبت‌نام با موفقیت انجام شد!');
-          window.location.href = 'login.html'; // انتقال به صفحه ورود
+          window.location.href = 'login.html';
         } else {
           alert(data.message || 'خطا در ثبت‌نام');
         }

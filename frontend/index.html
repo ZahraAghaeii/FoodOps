@@ -3,127 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FoodOps - سفارش آنلاین غذا</title>
+  <title>FoodOps - سیستم سفارش آنلاین غذا</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-  <header>
-    <h1>سیستم سفارش آنلاین FoodOps</h1>
-    <div class="header-right">
-        <ul class="navbar">
-            <li id="cart-nav-item">
-                <a href="cart.html">
-                    🛒 سبد خرید 
-                    <span id="cart-count">0</span>
-                </a>
-            </li>
-        </ul>
-        <div class="user-info">
-            <a href="profile.html" class="btn-profile-link">👤 پروفایل من</a>
-            <span id="userName">کاربر مهمان</span>
-            <button class="btn-logout" onclick="logout()">خروج</button>
-        </div>
-    </div>
-  </header>
+  <div class="app-container">
+    <!-- نوبار عمودی سمت راست -->
+    <nav class="sidebar-nav" id="main-sidebar"></nav>
 
-  <!-- بنر بالای منو (Hero Banner) -->
-  <div class="hero-banner">
-    <div class="hero-overlay"></div>
-  </div>
+    <!-- محتوای اصلی سمت چپ -->
+    <div class="main-wrapper">
+      <div class="hero-banner">
+        <div class="hero-overlay"></div>
+      </div>
 
-  <div class="container">
-  
-    <!-- بخش گزارشات فروش ادمین -->
-    <div class="admin-section" id="adminReportsSection">
-        <h2>📊 گزارشات فروش سیستم</h2>
-        <div style="display: flex; gap: 15px; margin-top: 15px; flex-wrap: wrap;">
-            
-            <!-- کارت فروش روزانه -->
-            <div style="flex: 1; background: #fdfefe; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; text-align: center; border-top: 4px solid #3498db; min-width: 200px;">
-                <h3 style="color: #2c3e50; font-size: 15px; margin-bottom: 10px;">امروز (۲۴ ساعت اخیر)</h3>
-                <p style="font-size: 22px; font-weight: bold; color: #27ae60;" id="dailySales">۰ تومان</p>
-                <p style="font-size: 13px; color: #7f8c8d; margin-top: 5px;" id="dailyCount">تعداد سفارش: ۰</p>
-            </div>
-
-            <!-- کارت فروش هفتگی -->
-            <div style="flex: 1; background: #fdfefe; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; text-align: center; border-top: 4px solid #f39c12; min-width: 200px;">
-                <h3 style="color: #2c3e50; font-size: 15px; margin-bottom: 10px;">هفتگی (۷ روز اخیر)</h3>
-                <p style="font-size: 22px; font-weight: bold; color: #27ae60;" id="weeklySales">۰ تومان</p>
-                <p style="font-size: 13px; color: #7f8c8d; margin-top: 5px;" id="weeklyCount">تعداد سفارش: ۰</p>
-            </div>
-
-            <!-- کارت فروش ماهانه -->
-            <div style="flex: 1; background: #fdfefe; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; text-align: center; border-top: 4px solid #9b59b6; min-width: 200px;">
-                <h3 style="color: #2c3e50; font-size: 15px; margin-bottom: 10px;">ماهانه (۳۰ روز اخیر)</h3>
-                <p style="font-size: 22px; font-weight: bold; color: #27ae60;" id="monthlySales">۰ تومان</p>
-                <p style="font-size: 13px; color: #7f8c8d; margin-top: 5px;" id="monthlyCount">تعداد سفارش: ۰</p>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- فرم ثبت دسته‌بندی جدید (مخصوص ادمین) -->
-    <div id="admin-category-section" class="admin-section">
-      <h2>📂 افزودن دسته‌بندی جدید</h2>
-      <form id="add-category-form" class="admin-form" style="grid-template-columns: 1fr auto;">
-        <input type="text" id="category-name" placeholder="نام دسته‌بندی (مثلاً نوشیدنی، پیش‌غذا)" required />
-        <button type="submit" class="btn-submit-cat">ثبت دسته‌بندی</button>
-      </form>
-    </div>
-
-    <!-- فرم ثبت غذای جدید (مخصوص ادمین) -->
-    <div id="admin-menu-section" class="admin-section">
-      <h2>➕ افزودن غذای جدید به منو</h2>
-      <form id="add-menu-form" class="admin-form">
-        <input type="text" id="menu-name" placeholder="نام غذا (مثلاً پیتزا پپرونی)" required />
-        <input type="text" id="menu-desc" placeholder="توضیحات غذا" required />
-        <input type="number" id="menu-price" placeholder="قیمت (تومان)" required />
-        <input type="number" id="menu-stock" placeholder="تعداد موجودی (مثلاً 50)" min="0" value="10" required />
-        
-        <!-- فیلتر انتخاب فایل از لپ‌تاپ به همراه متن راهنما -->
-        <div style="display: flex; flex-direction: column; gap: 4px;">
-          <label style="font-size: 12px; color: #555; font-weight: bold;">انتخاب عکس غذا از لپ‌تاپ Q530VJ:</label>
-          <input type="file" id="menu-image-file" accept="image/*" style="padding: 6px; border: 1px solid #ccc; border-radius: 5px; background: #fff;" />
-        </div>
-
-        <select id="menu-category" required>
-          <option value="">در حال بارگذاری دسته‌بندی‌ها...</option>
-        </select>
-        <button type="submit" class="btn-submit-food">ثبت غذا</button>
-      </form>
-    </div>
-
-    <div class="main-content">
-      <!-- منوی غذاها -->
-      <div class="menu-section">
-        <h2>منوی غذا و نوشیدنی</h2>
-        
-        <!-- باکس جستجوی غذاها -->
-        <div style="margin-bottom: 15px; position: relative;">
-          <input 
-            type="text" 
-            id="menuSearchInput" 
-            placeholder="🔍 جستجوی نام غذا یا نوشیدنی (مثلاً موهیتو)..." 
-            oninput="handleSearchInput()"
-            style="width: 100%; padding: 12px 16px; font-size: 14px; border: 2px solid #e2e8f0; border-radius: 8px; outline: none; box-sizing: border-box; transition: border-color 0.2s;"
-            onfocus="this.style.borderColor='#3498db'"
-            onblur="this.style.borderColor='#e2e8f0'"
-          />
-        </div>
-
-        <!-- نوار فیلتر دسته‌بندی‌ها -->
-        <div class="category-filter-bar" id="categoryFilterBar">
-          <button class="filter-btn active" onclick="filterMenu('all', this)">همه</button>
-        </div>
-        <div class="menu-grid" id="menuGrid">
-          <p>در حال دریافت منو...</p>
+      <div class="container">
+        <!-- منوی اصلی غذاها -->
+        <div class="menu-section">
+          <h2>منوی غذا و نوشیدنی</h2>
+          <div style="margin: 15px 0;">
+            <input type="text" id="menuSearchInput" placeholder="🔍 جستجوی نام غذا یا نوشیدنی..." oninput="handleSearchInput()" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 6px; outline: none;">
+          </div>
+          <div class="category-filter-bar" id="categoryFilterBar">
+            <button class="filter-btn active" onclick="filterMenu('all', this)">همه</button>
+          </div>
+          <div class="menu-grid" id="menuGrid">
+            <p>در حال دریافت منو...</p>
+          </div>
         </div>
       </div>
     </div>
-    
   </div>
 
+  <script src="js/navbar.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/app.js"></script>
 </body>
