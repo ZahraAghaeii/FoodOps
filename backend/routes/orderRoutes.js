@@ -14,12 +14,20 @@ const {
   checkoutCart,
   cancelOrderCustomer,
   getSalesReports,
-  getAllOrders
+  getAllOrders,
+  getWorkingHours,
+  updateWorkingHours
 } = require('../controllers/orderController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
-// تمامی روت‌ها نیازمند احراز هویت هستند
+// روت عمومی دریافت ساعات کاری
+router.get('/working-hours', getWorkingHours);
+
+// تمامی روت‌های زیر نیازمند احراز هویت هستند
 router.use(protect);
+
+// آپدیت ساعات کاری توسط ادمین
+router.patch('/working-hours', authorize('Admin'), updateWorkingHours);
 
 // ثبت سفارش جدید توسط مشتری
 router.post('/', createOrder);
@@ -28,7 +36,7 @@ router.post('/', createOrder);
 router.get('/me', getMyOrders);
 router.get('/my-orders', getMyOrders);
 
-// روت‌های صف آشپزخانه (شامل تمام عناوین شغلی آشپزخانه)
+// روت‌های صف آشپزخانه
 router.get(
   '/kitchen',
   authorize('Kitchen Staff', 'Kitchen', 'Cook', 'Chef', 'Admin', 'Cashier'),
@@ -45,11 +53,11 @@ router.patch(
   readyOrder
 );
 
-// روت‌های تحویل سفارش (فقط مخصوص صندوق‌دار و ادمین)
+// روت‌های تحویل سفارش
 router.patch('/:id/deliver', authorize('Cashier', 'Admin'), deliverOrder);
 router.patch('/:id/status', authorize('Cashier', 'Admin'), updateOrderStatus);
 
-// مسیرهای جدید سبد خرید (مخصوص مشتری)
+// مسیرهای جدید سبد خرید
 router.post('/cart/add', authorize('Customer'), addToCart);
 router.post('/cart/remove', authorize('Customer'), removeFromCart);
 router.get('/cart', authorize('Customer'), getCart);

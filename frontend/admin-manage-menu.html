@@ -13,6 +13,29 @@
 
     <div class="main-wrapper">
       <div class="container" style="max-width: 900px;">
+
+        <!-- فرم تنظیم ساعات کاری -->
+        <div style="background: white; padding: 25px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 25px;">
+          <h2>⏰ تنظیم ساعات کاری سفارش‌گیری</h2>
+          <form id="working-hours-form" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; margin-top: 15px;">
+            <div class="form-group" style="margin: 0; flex: 1;">
+              <label>ساعت شروع:</label>
+              <input type="time" id="opening-time" required />
+            </div>
+            <div class="form-group" style="margin: 0; flex: 1;">
+              <label>ساعت پایان:</label>
+              <input type="time" id="closing-time" required />
+            </div>
+            <div class="form-group" style="margin: 0; flex: 1;">
+              <label>وضعیت سیستم:</label>
+              <select id="system-status">
+                <option value="true">فعال (باز)</option>
+                <option value="false">غیرفعال (تعطیل)</option>
+              </select>
+            </div>
+            <button type="submit" style="width: auto;">ذخیره ساعات کاری</button>
+          </form>
+        </div>
         
         <!-- فرم ثبت دسته‌بندی جدید -->
         <div style="background: white; padding: 25px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 25px;">
@@ -68,6 +91,49 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       fetchCategories();
+      loadWorkingHoursAdmin();
+    });
+
+    async function loadWorkingHoursAdmin() {
+      try {
+        const res = await fetch('http://localhost:5000/api/orders/working-hours');
+        const data = await res.json();
+        if (data) {
+          if (document.getElementById('opening-time')) document.getElementById('opening-time').value = data.openingTime || "08:00";
+          if (document.getElementById('closing-time')) document.getElementById('closing-time').value = data.closingTime || "22:00";
+          if (document.getElementById('system-status')) document.getElementById('system-status').value = String(data.isSystemOpen);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    document.getElementById('working-hours-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const token = localStorage.getItem('token');
+      const openingTime = document.getElementById('opening-time').value;
+      const closingTime = document.getElementById('closing-time').value;
+      const isSystemOpen = document.getElementById('system-status').value === 'true';
+
+      try {
+        const res = await fetch('http://localhost:5000/api/orders/working-hours', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ openingTime, closingTime, isSystemOpen })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert('ساعات کاری با موفقیت بروزرسانی شد! ⏰');
+        } else {
+          alert(data.message || 'خطا در ثبت ساعات کاری');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('ارتباط با سرور برقرار نشد.');
+      }
     });
   </script>
 </body>

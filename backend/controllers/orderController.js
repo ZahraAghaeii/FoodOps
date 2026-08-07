@@ -1,11 +1,85 @@
 const Order = require('../models/Order');
 const MenuItem = require('../models/MenuItem');
+const Settings = require('../models/Settings');
 
-// @desc    ثبت سفارش جدید توسط مشتری (به همراه کسر خودکار موجودی)
+// تابع کمکی بررسی باز بودن سیستم در زمان فعلی
+const checkIsWorkingHours = async () => {
+  let settings = await Settings.findOne();
+  if (!settings) {
+    settings = await Settings.create({ openingTime: "08:00", closingTime: "22:00", isSystemOpen: true });
+  }
+
+  if (!settings.isSystemOpen) {
+    return { isOpen: false, message: 'سفارش‌گیری در حال حاضر توسط ادمین غیرفعال شده است.' };
+  }
+
+  const now = new Date();
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+  const [openHour, openMin] = settings.openingTime.split(':').map(Number);
+  const [closeHour, closeMin] = settings.closingTime.split(':').map(Number);
+
+  const openMinutes = openHour * 60 + openMin;
+  const closeMinutes = closeHour * 60 + closeMin;
+
+  if (currentMinutes < openMinutes || currentMinutes > closeMinutes) {
+    return {
+      isOpen: false,
+      message: `سفارش‌گیری خارج از ساعات کاری است. (ساعات کاری: از ${settings.openingTime} تا ${settings.closingTime})`
+    };
+  }
+
+  return { isOpen: true };
+};
+
+// دریافت ساعات کاری سیستم
+exports.getWorkingHours = async (req, res) => {
+  try {
+    let settings = await Settings.findOne();
+    if (!settings) {
+      settings = await Settings.create({ openingTime: "08:00", closingTime: "22:00", isSystemOpen: true });
+    }
+    const check = await checkIsWorkingHours();
+    res.json({ 
+      ...settings._doc, 
+      isOpenNow: check.isOpen, 
+      statusMessage: check.message || 'سفارش‌گیری فعال است' 
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'خطا در دریافت تنظیمات' });
+  }
+};
+
+// آپدیت ساعات کاری توسط ادمین
+exports.updateWorkingHours = async (req, res) => {
+  try {
+    const { openingTime, closingTime, isSystemOpen } = req.body;
+    let settings = await Settings.findOne();
+    if (!settings) {
+      settings = new Settings();
+    }
+    if (openingTime) settings.openingTime = openingTime;
+    if (closingTime) settings.closingTime = closingTime;
+    if (isSystemOpen !== undefined) settings.isSystemOpen = isSystemOpen;
+
+    await settings.save();
+    res.json({ message: 'ساعات کاری با موفقیت بروزرسانی شد', settings });
+  } catch (error) {
+    res.status(500).json({ message: 'خطا در بروزرسانی ساعات کاری' });
+  }
+};
+
+// @desc    ثبت سفارش جدید توسط مشتری (به همراه کسر خودکار موجودی و چک ساعات کاری)
 // @route   POST /api/orders
 // @access  Private (Customer)
 exports.createOrder = async (req, res) => {
   try {
+    // بررسی ساعات کاری
+    const workingCheck = await checkIsWorkingHours();
+    if (!workingCheck.isOpen) {
+      return res.status(400).json({ message: workingCheck.message });
+    }
+
     const { items } = req.body;
 
     if (!items || items.length === 0) {
@@ -15,9 +89,8 @@ exports.createOrder = async (req, res) => {
     let totalPrice = 0;
     const orderItems = [];
     const itemsToUpdate = [];
-    let maxPrepTime = 15; // حداقل زمان پیش‌فرض
+    let maxPrepTime = 15;
 
-    // ۱. بررسی موجودی تمامی آیتم‌ها و محاسبه زمان آماده‌سازی
     for (const item of items) {
       const menuItem = await MenuItem.findById(item.menuItem);
       if (!menuItem) {
@@ -29,7 +102,6 @@ exports.createOrder = async (req, res) => {
         });
       }
 
-      // محاسبه بیشترین زمان آماده‌سازی بین غذاهای انتخابی
       const itemPrepTime = menuItem.prepTime || 15;
       if (itemPrepTime > maxPrepTime) {
         maxPrepTime = itemPrepTime;
@@ -48,7 +120,6 @@ exports.createOrder = async (req, res) => {
       });
     }
 
-    // ۲. کسر خودکار موجودی از دیتابیس
     for (const itemObj of itemsToUpdate) {
       itemObj.model.stock -= itemObj.quantity;
       if (itemObj.model.stock <= 0) {
@@ -58,10 +129,8 @@ exports.createOrder = async (req, res) => {
       await itemObj.model.save();
     }
 
-    // محاسبه زمان دقیق تحویل تخمینی
     const estimatedReadyAt = new Date(Date.now() + maxPrepTime * 60 * 1000);
 
-    // ۳. ایجاد سفارش
     const order = await Order.create({
       customer: req.user._id,
       items: orderItems,
@@ -106,9 +175,7 @@ exports.getKitchenOrders = async (req, res) => {
   }
 };
 
-// @desc    شروع آماده‌سازی سفارش (توسط پرسنل آشپزخانه)
-// @route   PATCH /api/orders/:id/start
-// @access  Private (Kitchen Staff / Admin)
+// @desc    شروع آماده‌سازی سفارش
 exports.startOrder = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
@@ -127,8 +194,6 @@ exports.startOrder = async (req, res) => {
 };
 
 // @desc    تغییر وضعیت سفارش به آماده تحویل
-// @route   PATCH /api/orders/:id/ready
-// @access  Private (Kitchen Staff / Admin)
 exports.readyOrder = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
@@ -146,9 +211,7 @@ exports.readyOrder = async (req, res) => {
   }
 };
 
-// @desc    تحویل سفارش به مشتری (توسط صندوق‌دار/تحویل‌دهنده)
-// @route   PATCH /api/orders/:id/deliver
-// @access  Private (Cashier / Staff / Admin)
+// @desc    تحویل سفارش به مشتری
 exports.deliverOrder = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
@@ -167,8 +230,6 @@ exports.deliverOrder = async (req, res) => {
 };
 
 // @desc    تغییر وضعیت دستی/عمومی سفارش
-// @route   PATCH /api/orders/:id/status
-// @access  Private (Staff / Admin)
 exports.updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
@@ -193,9 +254,14 @@ exports.updateOrderStatus = async (req, res) => {
   }
 };
 
-// افزودن به سبد خرید و کسر موجودی
+// افزودن به سبد خرید و کسر موجودی (به همراه بررسی ساعات کاری)
 exports.addToCart = async (req, res) => {
     try {
+        const workingCheck = await checkIsWorkingHours();
+        if (!workingCheck.isOpen) {
+          return res.status(400).json({ message: workingCheck.message });
+        }
+
         const { itemId, quantity = 1 } = req.body;
         const item = await MenuItem.findById(itemId);
 
@@ -203,11 +269,9 @@ exports.addToCart = async (req, res) => {
             return res.status(400).json({ message: 'موجودی کافی نیست یا آیتم یافت نشد.' });
         }
 
-        // کسر موجودی
         item.stock -= quantity;
         await item.save();
 
-        // پیدا کردن سبد خرید (status: 'cart')
         let cart = await Order.findOne({ customer: req.user._id, status: 'cart' });
 
         if (!cart) {
@@ -279,17 +343,20 @@ exports.getCart = async (req, res) => {
     }
 };
 
-// نهایی سازی سفارش (تبدیل cart به Pending برای ارسال به آشپزخانه)
+// نهایی سازی سفارش (به همراه بررسی ساعات کاری)
 exports.checkoutCart = async (req, res) => {
     try {
-        // پیدا کردن سبد خرید کاربر
+        const workingCheck = await checkIsWorkingHours();
+        if (!workingCheck.isOpen) {
+          return res.status(400).json({ message: workingCheck.message });
+        }
+
         const cart = await Order.findOne({ customer: req.user._id, status: 'cart' });
 
         if (!cart || cart.items.length === 0) {
             return res.status(400).json({ message: 'سبد خرید شما خالی است.' });
         }
 
-        // محاسبه زمان آماده‌سازی نهایی بر اساس غذاهای موجود در سبد
         let maxPrepTime = 15;
         for (const item of cart.items) {
             const menuItem = await MenuItem.findById(item.menuItem);
@@ -300,7 +367,6 @@ exports.checkoutCart = async (req, res) => {
 
         const estimatedReadyAt = new Date(Date.now() + maxPrepTime * 60 * 1000);
 
-        // تغییر وضعیت به Pending و ذخیره زمان آماده‌سازی
         cart.status = 'Pending';
         cart.prepTimeMinutes = maxPrepTime;
         cart.estimatedReadyAt = estimatedReadyAt;
@@ -313,7 +379,7 @@ exports.checkoutCart = async (req, res) => {
     }
 };
 
-// دریافت تمام سفارشات کاربر (به جز سبد خریدهای نهایی‌نشده)
+// دریافت تمام سفارشات کاربر
 exports.getMyOrders = async (req, res) => {
     try {
         const orders = await Order.find({ customer: req.user._id, status: { $ne: 'cart' } })
@@ -326,11 +392,10 @@ exports.getMyOrders = async (req, res) => {
     }
 };
 
-// لغو سفارش توسط مشتری (فقط در حالت Pending)
+// لغو سفارش توسط مشتری
 exports.cancelOrderCustomer = async (req, res) => {
     try {
         const orderId = req.params.id;
-        
         const order = await Order.findOne({ _id: orderId, customer: req.user._id });
 
         if (!order) {
@@ -352,13 +417,13 @@ exports.cancelOrderCustomer = async (req, res) => {
             }
         }
 
-        res.status(200).json({ message: 'سفارش با موفقیت لغو شد و مبلغ (در صورت پرداخت) عودت داده می‌شود.' });
+        res.status(200).json({ message: 'سفارش با موفقیت لغو شد.' });
     } catch (error) {
         res.status(500).json({ message: 'خطا در لغو سفارش', error: error.message });
     }
 };
 
-// دریافت گزارشات فروش (مخصوص ادمین)
+// دریافت گزارشات فروش
 exports.getSalesReports = async (req, res) => {
     try {
         const userRole = String(req.user.role).toLowerCase();
@@ -405,7 +470,7 @@ exports.getSalesReports = async (req, res) => {
     }
 };
 
-// دریافت تمام سفارشات سیستم برای پنل ادمین
+// دریافت تمام سفارشات سیستم
 exports.getAllOrders = async (req, res) => {
     try {
         const userRole = String(req.user.role).toLowerCase();

@@ -20,10 +20,33 @@ window.onload = () => {
     userNameElem.innerText = `خوش آمدید، ${user.name}`;
   }
 
+  checkWorkingHoursStatus();
   fetchMenu();
   fetchCategories();
   fetchCartCount();
 };
+
+// چک کردن زنده ساعات کاری سیستم
+async function checkWorkingHoursStatus() {
+  try {
+    const res = await fetch(`${API_ORDERS}/working-hours`);
+    const data = await res.json();
+
+    if (!data.isOpenNow) {
+      const banner = document.createElement('div');
+      banner.id = 'working-hours-warning-banner';
+      banner.style.cssText = 'background: #fee2e2; border: 1px solid #ef4444; color: #991b1b; padding: 12px 16px; text-align: center; border-radius: 8px; margin-bottom: 15px; font-weight: bold; font-size: 14px;';
+      banner.innerText = `⚠️ ${data.statusMessage}`;
+      
+      const container = document.querySelector('.main-wrapper .container');
+      if (container && !document.getElementById('working-hours-warning-banner')) {
+        container.prepend(banner);
+      }
+    }
+  } catch (err) {
+    console.error('Error checking working hours:', err);
+  }
+}
 
 // خروج از حساب کاربری
 function logout() {
@@ -364,7 +387,7 @@ function filterMenu(categoryId, btnElement) {
   if (btnElement) btnElement.classList.add('active');
 
   currentCategoryFilter = categoryId;
-  applyFilters(); // اعمال همزمان با سرچ
+  applyFilters();
 }
 
 // نمایش سبد خرید بر اساس نقش کاربر
@@ -387,7 +410,6 @@ document.addEventListener("DOMContentLoaded", () => {
 // Listenerها برای فرم‌های ثبت دسته‌بندی و غذا (در صفحه admin-manage-menu.html)
 document.addEventListener('DOMContentLoaded', () => {
 
-  // ۱. ثبت دسته‌بندی جدید
   const addCategoryForm = document.getElementById('add-category-form');
   if (addCategoryForm) {
     addCategoryForm.addEventListener('submit', async (e) => {
@@ -428,7 +450,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ۲. ثبت غذای جدید
   const addMenuForm = document.getElementById('add-menu-form');
   if (addMenuForm) {
     addMenuForm.addEventListener('submit', async (e) => {
@@ -484,7 +505,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// افزودن به سبد خرید با در نظر گرفتن تعداد مشخص شده توسط کاربر
+// افزودن به سبد خرید با در نظر گرفتن تعداد مشخص شده توسط کاربر (به همراه بررسی ساعات کاری)
 async function addToCartWithQty(itemId) {
   const token = localStorage.getItem('token');
   if (!token) return alert('لطفا ابتدا وارد سایت شوید.');
@@ -512,7 +533,7 @@ async function addToCartWithQty(itemId) {
       alert(`با موفقیت (${quantity} عدد) به سبد خرید اضافه شد.`);
       fetchMenu();
     } else {
-      alert(data.message || 'موجودی کافی نیست.');
+      alert(data.message || 'موجودی کافی نیست یا سیستم تعطیل است.');
     }
   } catch (error) {
     console.error('Error adding to cart:', error);
@@ -578,15 +599,12 @@ async function fetchAdminReports() {
       const monthlySalesElem = document.getElementById('monthlySales');
       const monthlyCountElem = document.getElementById('monthlyCount');
 
-      // آپدیت گزارش روزانه
       if (dailySalesElem) dailySalesElem.innerText = `${(data.daily?.totalSales || 0).toLocaleString('fa-IR')} تومان`;
       if (dailyCountElem) dailyCountElem.innerText = `تعداد سفارش: ${data.daily?.orderCount || 0}`;
 
-      // آپدیت گزارش هفتگی
       if (weeklySalesElem) weeklySalesElem.innerText = `${(data.weekly?.totalSales || 0).toLocaleString('fa-IR')} تومان`;
       if (weeklyCountElem) weeklyCountElem.innerText = `تعداد سفارش: ${data.weekly?.orderCount || 0}`;
 
-      // آپدیت گزارش ماهانه
       if (monthlySalesElem) monthlySalesElem.innerText = `${(data.monthly?.totalSales || 0).toLocaleString('fa-IR')} تومان`;
       if (monthlyCountElem) monthlyCountElem.innerText = `تعداد سفارش: ${data.monthly?.orderCount || 0}`;
     } else {
