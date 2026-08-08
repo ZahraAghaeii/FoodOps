@@ -2,6 +2,21 @@ const Order = require('../models/Order');
 const MenuItem = require('../models/MenuItem');
 const Settings = require('../models/Settings');
 const Discount = require('../models/Discount');
+const OrderLog = require('../models/OrderLog'); // مدل لاگ برای بخش امتیازی
+
+// تابع کمکی برای ثبت لاگ تغییر وضعیت سفارش
+const addOrderLog = async (orderId, oldStatus, newStatus, userId) => {
+  try {
+    await OrderLog.create({
+      orderId,
+      oldStatus,
+      newStatus,
+      changedBy: userId
+    });
+  } catch (err) {
+    console.error('خطا در ثبت لاگ سفارش:', err);
+  }
+};
 
 // تابع کمکی بررسی باز بودن سیستم در زمان فعلی
 const checkIsWorkingHours = async () => {
@@ -138,6 +153,9 @@ exports.createOrder = async (req, res) => {
       estimatedReadyAt: estimatedReadyAt
     });
 
+    // ثبت لاگ ایجاد سفارش اولیه
+    await addOrderLog(order._id, null, 'Pending', req.user._id);
+
     res.status(201).json(order);
   } catch (error) {
     console.error('خطا در ثبت سفارش:', error);
@@ -175,8 +193,13 @@ exports.startOrder = async (req, res) => {
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ message: 'سفارش یافت نشد' });
 
+    const oldStatus = order.status;
     order.status = 'Preparing';
     const updatedOrder = await order.save();
+
+    // ثبت لاگ تغییر وضعیت
+    await addOrderLog(order._id, oldStatus, 'Preparing', req.user._id);
+
     res.json({ message: 'وضعیت سفارش به در حال آماده‌سازی تغییر یافت', order: updatedOrder });
   } catch (error) {
     res.status(500).json({ message: 'خطا در تغییر وضعیت سفارش', error: error.message });
@@ -188,8 +211,13 @@ exports.readyOrder = async (req, res) => {
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ message: 'سفارش یافت نشد' });
 
+    const oldStatus = order.status;
     order.status = 'Ready';
     const updatedOrder = await order.save();
+
+    // ثبت لاگ تغییر وضعیت
+    await addOrderLog(order._id, oldStatus, 'Ready', req.user._id);
+
     res.json({ message: 'سفارش آماده تحویل شد', order: updatedOrder });
   } catch (error) {
     res.status(500).json({ message: 'خطا در تغییر وضعیت سفارش', error: error.message });
@@ -201,8 +229,13 @@ exports.deliverOrder = async (req, res) => {
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ message: 'سفارش یافت نشد' });
 
+    const oldStatus = order.status;
     order.status = 'Delivered';
     const updatedOrder = await order.save();
+
+    // ثبت لاگ تغییر وضعیت
+    await addOrderLog(order._id, oldStatus, 'Delivered', req.user._id);
+
     res.json({ message: 'سفارش با موفقیت تحویل مشتری شد', order: updatedOrder });
   } catch (error) {
     res.status(500).json({ message: 'خطا در تحویل سفارش', error: error.message });
@@ -221,8 +254,13 @@ exports.updateOrderStatus = async (req, res) => {
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ message: 'سفارش یافت نشد' });
 
+    const oldStatus = order.status;
     order.status = status;
     const updatedOrder = await order.save();
+
+    // ثبت لاگ تغییر وضعیت
+    await addOrderLog(order._id, oldStatus, status, req.user._id);
+
     res.json(updatedOrder);
   } catch (error) {
     res.status(500).json({ message: 'خطا در تغییر وضعیت سفارش', error: error.message });
@@ -355,12 +393,16 @@ exports.checkoutCart = async (req, res) => {
 
         const estimatedReadyAt = new Date(Date.now() + maxPrepTime * 60 * 1000);
 
+        const oldStatus = cart.status; // که 'cart' بوده است
         cart.status = 'Pending';
         cart.totalPrice = finalPrice; // ذخیره قیمت نهایی پس از تخفیف
         cart.prepTimeMinutes = maxPrepTime;
         cart.estimatedReadyAt = estimatedReadyAt;
         
         await cart.save();
+
+        // ثبت لاگ تبدیل سبد خرید به سفارش Pending
+        await addOrderLog(cart._id, oldStatus, 'Pending', req.user._id);
 
         res.status(200).json({ message: 'سفارش با موفقیت ثبت شد و به آشپزخانه ارسال گردید.' });
     } catch (error) {
@@ -391,8 +433,12 @@ exports.cancelOrderCustomer = async (req, res) => {
             return res.status(400).json({ message: 'این سفارش وارد مرحله آماده‌سازی شده و دیگر قابل لغو نیست.' });
         }
 
+        const oldStatus = order.status;
         order.status = 'Cancelled';
         await order.save();
+
+        // ثبت لاگ لغو سفارش
+        await addOrderLog(order._id, oldStatus, 'Cancelled', req.user._id);
 
         for (const item of order.items) {
             const menuItem = await MenuItem.findById(item.menuItem);

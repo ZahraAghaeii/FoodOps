@@ -23,8 +23,29 @@ async function fetchAllSystemOrders() {
     }
 }
 
+// تابع جدید برای نمایش تاریخچه سفارش
+async function showOrderLogs(orderId) {
+    const token = localStorage.getItem('token');
+    try {
+        const response = await fetch(`${API_ORDERS}/${orderId}/logs`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const logs = await response.json();
+        
+        if (logs.length === 0) return alert('هیچ تغییری برای این سفارش ثبت نشده است.');
+
+        let logText = "تاریخچه وضعیت سفارش:\n\n";
+        logs.forEach(log => {
+            const date = new Date(log.changedAt).toLocaleString('fa-IR');
+            logText += `از ${log.oldStatus || 'شروع'} به ${log.newStatus} در تاریخ ${date}\n`;
+        });
+        alert(logText);
+    } catch (err) {
+        alert('خطا در دریافت تاریخچه.');
+    }
+}
+
 function renderKanbanBoard(orders) {
-    // پاک کردن ستون‌ها
     document.getElementById('col-Pending').innerHTML = '';
     document.getElementById('col-Preparing').innerHTML = '';
     document.getElementById('col-Ready').innerHTML = '';
@@ -35,9 +56,6 @@ function renderKanbanBoard(orders) {
 
     orders.forEach(order => {
         const customerName = order.customer ? order.customer.name : 'کاربر نامشخص';
-        const customerPhone = order.customer && order.customer.phone ? order.customer.phone : 'بدون شماره';
-
-        // فرمت کردن تاریخ و ساعت دقیق
         const dateObj = new Date(order.createdAt);
         const dateStr = dateObj.toLocaleDateString('fa-IR') + ' - ' + dateObj.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
 
@@ -50,25 +68,18 @@ function renderKanbanBoard(orders) {
         }
 
         const cardHtml = `
-                    <div class="admin-order-card">
-                        <div class="card-header" style="display: block; margin-bottom: 8px;">
-                            <div>کد: ${order._id.slice(-5)}</div>
-                            <div style="margin-top: 4px;">⏱️ ${dateStr}</div>
-                        </div>
-                        <div class="card-customer">
-                            👤 ${customerName} <br>
-                            <span style="font-size: 11px; color: #888;">📞 ${customerPhone}</span>
-                        </div>
-                        <ul class="card-items">
-                            ${itemsHtml}
-                        </ul>
-                        <div class="card-total">
-                            مبلغ: ${(order.totalPrice || 0).toLocaleString('fa-IR')} تومان
-                        </div>
-                    </div>
-                `;
+            <div class="admin-order-card" style="margin-bottom:10px; border:1px solid #ddd; padding:10px; border-radius:5px;">
+                <div class="card-header">
+                    <div>کد: ${order._id.slice(-5)}</div>
+                    <div>⏱️ ${dateStr}</div>
+                </div>
+                <div class="card-customer">👤 ${customerName}</div>
+                <ul class="card-items">${itemsHtml}</ul>
+                <div class="card-total">مبلغ: ${(order.totalPrice || 0).toLocaleString('fa-IR')} تومان</div>
+                <button onclick="showOrderLogs('${order._id}')" style="margin-top:5px; background:#3498db; color:white; border:none; padding:5px; border-radius:3px; cursor:pointer; width:100%;">مشاهده تاریخچه</button>
+            </div>
+        `;
 
-        // پیدا کردن ستون مربوطه بر اساس وضعیت سفارش و اضافه کردن کارت به آن
         const targetColumn = document.getElementById(`col-${order.status}`);
         if (targetColumn) {
             targetColumn.innerHTML += cardHtml;
