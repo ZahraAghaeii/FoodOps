@@ -1,3 +1,5 @@
+let allSystemOrders = []; // متغیر سراسری برای نگهداری تمام سفارشات
+
 document.addEventListener("DOMContentLoaded", () => {
     fetchAllSystemOrders();
 });
@@ -12,8 +14,8 @@ async function fetchAllSystemOrders() {
         });
 
         if (response.ok) {
-            const orders = await response.json();
-            renderKanbanBoard(orders);
+            allSystemOrders = await response.json();
+            renderKanbanBoard(allSystemOrders); // در ابتدا همه را نمایش بده
         } else {
             alert('خطا در دریافت اطلاعات. آیا شما ادمین هستید؟');
         }
@@ -21,6 +23,38 @@ async function fetchAllSystemOrders() {
         console.error(err);
         alert('خطا در ارتباط با سرور.');
     }
+}
+
+// تابع اعمال فیلتر تاریخ
+function applyDateFilter() {
+    const selectedDate = document.getElementById('orderDateFilter').value;
+    const statusText = document.getElementById('filterStatus');
+
+    if (!selectedDate) {
+        alert('لطفاً ابتدا یک تاریخ را از تقویم انتخاب کنید.');
+        return;
+    }
+
+    // فیلتر کردن آرایه اصلی بر اساس تطابق بخش تاریخ
+    const filteredOrders = allSystemOrders.filter(order => {
+        const orderDateOnly = new Date(order.createdAt).toISOString().split('T')[0];
+        return orderDateOnly === selectedDate;
+    });
+
+    statusText.innerText = `نمایش نتایج برای تاریخ: ${selectedDate} (${filteredOrders.length} سفارش)`;
+    statusText.style.color = '#27ae60';
+    
+    renderKanbanBoard(filteredOrders);
+}
+
+// تابع پاک کردن فیلتر
+function clearDateFilter() {
+    document.getElementById('orderDateFilter').value = '';
+    const statusText = document.getElementById('filterStatus');
+    statusText.innerText = 'در حال نمایش تمام سفارشات';
+    statusText.style.color = '#7f8c8d';
+    
+    renderKanbanBoard(allSystemOrders);
 }
 
 // تابع جدید برای نمایش تاریخچه سفارش
@@ -63,20 +97,20 @@ function renderKanbanBoard(orders) {
         if (order.items && order.items.length > 0) {
             order.items.forEach(i => {
                 const name = i.menuItem ? i.menuItem.name : 'آیتم پاک شده';
-                itemsHtml += `<li>${name} (x${i.quantity})</li>`;
+                itemsHtml += `<li style="margin-bottom: 4px;">${name} (x${i.quantity})</li>`;
             });
         }
 
         const cardHtml = `
-            <div class="admin-order-card" style="margin-bottom:10px; border:1px solid #ddd; padding:10px; border-radius:5px;">
-                <div class="card-header">
-                    <div>کد: ${order._id.slice(-5)}</div>
+            <div class="admin-order-card" style="margin-bottom:15px; border:1px solid #ddd; padding:15px; border-radius:8px; background: #fdfefe;">
+                <div class="card-header" style="display: flex; justify-content: space-between; margin-bottom: 8px; color: #7f8c8d; font-size: 11px;">
+                    <div>کد: <b>${order._id.slice(-5)}</b></div>
                     <div>⏱️ ${dateStr}</div>
                 </div>
-                <div class="card-customer">👤 ${customerName}</div>
-                <ul class="card-items">${itemsHtml}</ul>
-                <div class="card-total">مبلغ: ${(order.totalPrice || 0).toLocaleString('fa-IR')} تومان</div>
-                <button onclick="showOrderLogs('${order._id}')" style="margin-top:5px; background:#3498db; color:white; border:none; padding:5px; border-radius:3px; cursor:pointer; width:100%;">مشاهده تاریخچه</button>
+                <div class="card-customer" style="font-weight: bold; color: #2c3e50; font-size: 14px; margin-bottom: 8px;">👤 ${customerName}</div>
+                <ul class="card-items" style="list-style: none; padding: 0; margin: 10px 0; color: #555; border-top: 1px dashed #eee; padding-top: 8px;">${itemsHtml}</ul>
+                <div class="card-total" style="font-weight: bold; color: #27ae60; margin-top: 10px;">مبلغ: ${(order.totalPrice || 0).toLocaleString('fa-IR')} تومان</div>
+                <button onclick="showOrderLogs('${order._id}')" style="margin-top:12px; background:#3498db; color:white; border:none; padding:8px; border-radius:5px; cursor:pointer; width:100%; font-weight: bold; transition: 0.2s;">مشاهده تاریخچه</button>
             </div>
         `;
 

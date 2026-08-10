@@ -5,6 +5,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FoodOps - مدیریت کل سفارشات</title>
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* استایل نوار فیلتر */
+    .filter-bar {
+        background: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .filter-bar input[type="date"] {
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-family: inherit;
+        outline: none;
+    }
+
+    .btn-filter, .btn-clear {
+        color: white;
+        border: none;
+        padding: 9px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 13px;
+        transition: 0.2s;
+        width: auto;
+    }
+    .btn-filter { background: #2980b9; }
+    .btn-filter:hover { background: #2471a3; }
+    .btn-clear { background: #e74c3c; }
+    .btn-clear:hover { background: #c0392b; }
+  </style>
 </head>
 <body>
 
@@ -15,6 +53,15 @@
       <div class="container" style="max-width: 1400px;">
         <h2 style="margin-bottom: 20px;">مدیریت جامع سفارشات</h2>
         
+        <!-- نوار فیلتر تاریخ -->
+        <div class="filter-bar">
+            <label style="font-weight: bold; color: #2c3e50; font-size: 14px;">📅 فیلتر بر اساس تاریخ ثبت سفارش:</label>
+            <input type="date" id="orderDateFilter" title="تاریخ مورد نظر را انتخاب کنید">
+            <button class="btn-filter" onclick="applyDateFilter()">جستجو</button>
+            <button class="btn-clear" onclick="clearDateFilter()">نمایش همه</button>
+            <span id="filterStatus" style="font-size: 12px; color: #7f8c8d; margin-right: auto;">در حال نمایش تمام سفارشات</span>
+        </div>
+
         <div style="display: flex; gap: 15px; overflow-x: auto; padding-bottom: 20px;">
           <div style="flex: 1; min-width: 220px; background: #fff; padding: 15px; border-radius: 8px; border-top: 4px solid #f39c12;">
             <h3>🟠 ثبت شده</h3>
