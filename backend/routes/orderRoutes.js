@@ -28,7 +28,7 @@ router.get('/public-ready', getPublicReadyOrders);
 
 router.use(protect);
 
-// روت جدید برای دریافت لاگ یک سفارش
+// روت برای دریافت لاگ یک سفارش
 router.get('/:id/logs', authorize('Admin', 'Kitchen Staff', 'Cashier'), async (req, res) => {
   try {
     const logs = await OrderLog.find({ orderId: req.params.id })
