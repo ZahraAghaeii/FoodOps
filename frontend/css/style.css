@@ -580,3 +580,48 @@ body.public-display-body {
   background: var(--primary-orange);
   color: #fff;
 }
+
+/* دکمه ریمو در سبد خرید */
+.cart-list {
+    list-style: none;
+    padding: 0;
+}
+
+.cart-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.item-info {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-remove {
+    background: #fee2e2 !important;
+    color: #ef4444 !important;
+    border: 1px solid #ef4444 !important;
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0; 
+}
+
+.btn-remove:hover {
+    background: #ef4444 !important;
+    color: white !important;
+}
+
+
+.order-card.status-cancelled {
+  border-top-color: #ef4444 !important;
+}

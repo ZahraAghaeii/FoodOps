@@ -2,9 +2,9 @@ const Order = require('../models/Order');
 const MenuItem = require('../models/MenuItem');
 const Settings = require('../models/Settings');
 const Discount = require('../models/Discount');
-const OrderLog = require('../models/OrderLog'); // مدل لاگ برای بخش امتیازی
+const OrderLog = require('../models/OrderLog'); 
 
-// تابع کمکی برای ثبت لاگ تغییر وضعیت سفارش
+//  ثبت لاگ تغییر وضعیت سفارش
 const addOrderLog = async (orderId, oldStatus, newStatus, userId) => {
   try {
     await OrderLog.create({
@@ -18,7 +18,7 @@ const addOrderLog = async (orderId, oldStatus, newStatus, userId) => {
   }
 };
 
-// تابع کمکی بررسی باز بودن سیستم در زمان فعلی
+// بررسی باز بودن سیستم در زمان فعلی
 const checkIsWorkingHours = async () => {
   let settings = await Settings.findOne();
   if (!settings) {
@@ -85,7 +85,7 @@ exports.updateWorkingHours = async (req, res) => {
   }
 };
 
-// @desc    ثبت سفارش جدید توسط مشتری
+// ثبت سفارش جدید توسط مشتری
 exports.createOrder = async (req, res) => {
   try {
     const workingCheck = await checkIsWorkingHours();
@@ -393,9 +393,9 @@ exports.checkoutCart = async (req, res) => {
 
         const estimatedReadyAt = new Date(Date.now() + maxPrepTime * 60 * 1000);
 
-        const oldStatus = cart.status; // که 'cart' بوده است
+        const oldStatus = cart.status; 
         cart.status = 'Pending';
-        cart.totalPrice = finalPrice; // ذخیره قیمت نهایی پس از تخفیف
+        cart.totalPrice = finalPrice; 
         cart.prepTimeMinutes = maxPrepTime;
         cart.estimatedReadyAt = estimatedReadyAt;
         

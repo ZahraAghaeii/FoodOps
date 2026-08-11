@@ -1,4 +1,4 @@
-// گارد امنیتی: بررسی اجباری رمز موقت در تمام صفحات
+// امنیتی: بررسی اجباری رمز موقت در تمام صفحات
 (function checkTempPasswordGuard() {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const currentPage = window.location.pathname.split('/').pop();

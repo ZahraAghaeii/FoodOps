@@ -36,44 +36,85 @@ async function fetchCartItems() {
 function renderCartPage(cart) {
     const cartContainer = document.getElementById('cartItems');
     const checkoutBtn = document.getElementById('checkoutBtn');
-    cartContainer.innerHTML = '';
-
+    
+    // ۱. بررسی سبد خالی
     if (!cart.items || cart.items.length === 0) {
-        cartContainer.innerHTML = '<p style="font-size: 14px; color: #888; text-align: center; padding: 20px 0;">سبد خرید شما خالی است. برای انتخاب غذا به صفحه اصلی برگردید.</p>';
+        cartContainer.innerHTML = '<p style="text-align:center;">سبد خرید شما خالی است.</p>';
         document.getElementById('totalPrice').innerText = '۰ تومان';
         rawCartTotal = 0;
+        
+        // غیرفعال کردن دکمه
         checkoutBtn.disabled = true;
         checkoutBtn.style.opacity = "0.5";
         return;
     }
 
-    // فعال کردن دکمه پرداخت
+    // ۲. فعال کردن دکمه تایید (این بخش حذف شده بود!)
     checkoutBtn.disabled = false;
     checkoutBtn.style.opacity = "1";
 
-    // ذخیره مبلغ خام سبد خرید
+    // ۳. ذخیره مبلغ و پر کردن لیست
     rawCartTotal = cart.totalPrice || 0;
+    cartContainer.innerHTML = ''; // پاک کردن محتوای قبلی
 
-    // ساخت لیست آیتم‌ها
     cart.items.forEach(item => {
-        const itemName = item.menuItem ? item.menuItem.name : 'آیتم نامشخص';
-        const itemId = item.menuItem ? item.menuItem._id : null;
-        const itemTotalPrice = item.priceAtOrder * item.quantity;
-
         const li = document.createElement('li');
-        li.className = 'cart-item';
+        li.className = 'cart-row'; 
         li.innerHTML = `
-            <span class="cart-item-title">${itemName}</span>
-            <span class="cart-item-qty">${item.quantity} عدد</span>
-            <span class="cart-item-price">${itemTotalPrice.toLocaleString('fa-IR')} تومان</span>
-            <button class="btn-remove" onclick="removeItemFromCart('${itemId}')" title="حذف یک عدد">✕</button>
+            <div class="item-info">
+                <span class="item-name">${item.menuItem.name}</span>
+                <span class="item-price">(${item.quantity} عدد - ${(item.priceAtOrder * item.quantity).toLocaleString('fa-IR')} تومان)</span>
+            </div>
+            <button class="btn-remove" onclick="removeItemFromCart('${item.menuItem._id}')" title="حذف">✕</button>
         `;
         cartContainer.appendChild(li);
     });
 
-    // آپدیت جمع کل با مقدار امن rawCartTotal
+    // ۴. آپدیت قیمت نهایی
     document.getElementById('totalPrice').innerText = `${rawCartTotal.toLocaleString('fa-IR')} تومان`;
 }
+// function renderCartPage(cart) {
+//     const cartContainer = document.getElementById('cartItems');
+//     const checkoutBtn = document.getElementById('checkoutBtn');
+//     cartContainer.innerHTML = '';
+
+//     if (!cart.items || cart.items.length === 0) {
+//         cartContainer.innerHTML = '<p style="font-size: 14px; color: #888; text-align: center; padding: 20px 0;">سبد خرید شما خالی است. برای انتخاب غذا به صفحه اصلی برگردید.</p>';
+//         document.getElementById('totalPrice').innerText = '۰ تومان';
+//         rawCartTotal = 0;
+//         checkoutBtn.disabled = true;
+//         checkoutBtn.style.opacity = "0.5";
+//         return;
+//     }
+
+//     // فعال کردن دکمه پرداخت
+//     checkoutBtn.disabled = false;
+//     checkoutBtn.style.opacity = "1";
+
+//     // ذخیره مبلغ خام سبد خرید
+//     rawCartTotal = cart.totalPrice || 0;
+
+//     // ساخت لیست آیتم‌ها
+//     cart.items.forEach(item => {
+//         const itemName = item.menuItem ? item.menuItem.name : 'آیتم نامشخص';
+//         const itemId = item.menuItem ? item.menuItem._id : null;
+//         const itemTotalPrice = item.priceAtOrder * item.quantity;
+
+//         const li = document.createElement('li');
+//         li.className = 'cart-item';
+//         li.innerHTML = `
+//             <span class="cart-item-title">${itemName}</span>
+//             <span class="cart-item-qty">${item.quantity} عدد</span>
+//             <span class="cart-item-price">${itemTotalPrice.toLocaleString('fa-IR')} تومان</span>
+//             <button class="btn-remove" onclick="removeItemFromCart('${itemId}')" title="حذف یک عدد">✕</button>
+//         `;
+//         cartContainer.appendChild(li);
+//     });
+
+//     // آپدیت جمع کل با مقدار امن rawCartTotal
+//     document.getElementById('totalPrice').innerText = `${rawCartTotal.toLocaleString('fa-IR')} تومان`;
+// }
+
 
 // بررسی و اعمال کد تخفیف
 async function applyDiscountCode() {

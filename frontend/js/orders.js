@@ -1,5 +1,5 @@
 let currentTab = 'pending';
-let countdownIntervals = {}; // ذخیره تایمرها جهت جلوگیری از تداخل
+let countdownIntervals = {}; 
 
 document.addEventListener("DOMContentLoaded", () => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -74,6 +74,19 @@ function renderOrders(orders) {
         else if (order.status === 'Delivered') statusText = 'تحویل داده شده';
         else if (order.status === 'Cancelled') statusText = 'لغو شده';
 
+        // تبدیل تاریخ ثبت سفارش به فرمت خوانای شمسی
+        let formattedDate = '';
+        if (order.createdAt) {
+            const dateObj = new Date(order.createdAt);
+            formattedDate = dateObj.toLocaleDateString('fa-IR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
         let itemsHtml = '';
         if (order.items && order.items.length > 0) {
             order.items.forEach(i => {
@@ -114,9 +127,12 @@ function renderOrders(orders) {
         }
 
         card.innerHTML = `
-            <div class="order-header">
-                <span>کد سفارش: <b>${order._id.slice(-6)}</b></span>
-                <span class="badge-status status-${order.status}">${statusText}</span>
+            <div class="order-header" style="flex-direction: column; align-items: flex-start; gap: 5px; margin-bottom: 10px;">
+                <div style="display: flex; width: 100%; justify-content: space-between;">
+                    <span>کد سفارش: <b>${order._id.slice(-6)}</b></span>
+                    <span class="badge-status status-${order.status}">${statusText}</span>
+                </div>
+                ${formattedDate ? `<span style="font-size: 12px; color: #718096;">📅 تاریخ ثبت: ${formattedDate}</span>` : ''}
             </div>
             <ul class="order-items-list">
                 ${itemsHtml}
