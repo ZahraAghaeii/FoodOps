@@ -1,9 +1,7 @@
 const MenuItem = require('../models/MenuItem');
 const Category = require('../models/Category');
 
-// @desc    دریافت تمام غذاهای منو (امکان فیلتر بر اساس دسته‌بندی)
-// @route   GET /api/menu
-// @access  Public
+//   دریافت تمام غذاهای منو (امکان فیلتر بر اساس دسته‌بندی)
 exports.getMenuItems = async (req, res) => {
   try {
     const { category } = req.query;
@@ -20,9 +18,7 @@ exports.getMenuItems = async (req, res) => {
   }
 };
 
-// @desc    ایجاد آیتم جدید در منو (همراه با دریافت آدرس عکس دلخواه ادمین)
-// @route   POST /api/menu
-// @access  Private/Admin
+//   ایجاد آیتم جدید در منو
 exports.createMenuItem = async (req, res) => {
   try {
     const { name, description, price, category, imageUrl, isAvailable, stock } = req.body;
@@ -32,7 +28,7 @@ exports.createMenuItem = async (req, res) => {
       description,
       price,
       category,
-      imageUrl: imageUrl || '', // اگر ادمین آدرس عکس را وارد نکرد، خالی بماند
+      imageUrl: imageUrl || '', 
       isAvailable: isAvailable !== undefined ? isAvailable : true,
       stock: stock !== undefined ? Number(stock) : 100
     });
@@ -43,9 +39,7 @@ exports.createMenuItem = async (req, res) => {
   }
 };
 
-// @desc    ویرایش کامل آیتم منو
-// @route   PUT /api/menu/:id
-// @access  Private/Admin
+//     ویرایش کامل آیتم منو
 exports.updateMenuItem = async (req, res) => {
   try {
     const menuItem = await MenuItem.findById(req.params.id);
@@ -68,9 +62,7 @@ exports.updateMenuItem = async (req, res) => {
   }
 };
 
-// @desc    ویرایش قیمت آیتم منو (مخصوص ادمین)
-// @route   PATCH /api/menu/:id/price
-// @access  Private/Admin
+//    ویرایش قیمت آیتم منو (مخصوص ادمین)
 exports.updateMenuPrice = async (req, res) => {
   try {
     const { price } = req.body;
@@ -94,9 +86,7 @@ exports.updateMenuPrice = async (req, res) => {
   }
 };
 
-// @desc    ویرایش تعداد موجودی آیتم (مخصوص ادمین)
-// @route   PATCH /api/menu/:id/stock
-// @access  Private/Admin
+//     ویرایش تعداد موجودی آیتم (مخصوص ادمین)
 exports.updateStock = async (req, res) => {
   try {
     const { stock } = req.body;
@@ -121,9 +111,7 @@ exports.updateStock = async (req, res) => {
   }
 };
 
-// @desc    تغییر وضعیت فعال/غیرفعال بودن آیتم (مخصوص ادمین)
-// @route   PATCH /api/menu/:id/availability
-// @access  Private/Admin
+//     تغییر وضعیت فعال/غیرفعال بودن آیتم (مخصوص ادمین)
 exports.toggleAvailability = async (req, res) => {
   try {
     const menuItem = await MenuItem.findById(req.params.id);
@@ -141,9 +129,7 @@ exports.toggleAvailability = async (req, res) => {
   }
 };
 
-// @desc    حذف آیتم منو
-// @route   DELETE /api/menu/:id
-// @access  Private/Admin
+//    حذف آیتم منو
 exports.deleteMenuItem = async (req, res) => {
   try {
     const menuItem = await MenuItem.findById(req.params.id);

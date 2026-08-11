@@ -353,7 +353,7 @@ exports.getCart = async (req, res) => {
     }
 };
 
-// نهایی سازی سفارش با پشتیبانی از کد تخفیف
+// نهایی سازی سفارش 
 exports.checkoutCart = async (req, res) => {
     try {
         const workingCheck = await checkIsWorkingHours();

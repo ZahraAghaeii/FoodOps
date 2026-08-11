@@ -1,7 +1,7 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
-// تابع کمکی تولید توکن JWT
+// تابع تولید توکن JWT
 const generateToken = (id) => {
   return jwt.sign(
     { id }, 

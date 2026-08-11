@@ -1,8 +1,6 @@
 const Category = require('../models/Category');
 
-// @desc    دریافت تمام دسته‌بندی‌ها
-// @route   GET /api/categories
-// @access  Public
+// دریافت تمام دسته‌بندی‌ها
 exports.getCategories = async (req, res) => {
   try {
     const categories = await Category.find();
@@ -12,9 +10,7 @@ exports.getCategories = async (req, res) => {
   }
 };
 
-// @desc    ایجاد دسته‌بندی جدید
-// @route   POST /api/categories
-// @access  Private/Admin
+//  ایجاد دسته‌بندی جدید
 exports.createCategory = async (req, res) => {
   try {
     const { name, description } = req.body;
@@ -31,9 +27,7 @@ exports.createCategory = async (req, res) => {
   }
 };
 
-// @desc    ویرایش دسته‌بندی
-// @route   PUT /api/categories/:id
-// @access  Private/Admin
+//  ویرایش دسته‌بندی
 exports.updateCategory = async (req, res) => {
   try {
     const { name, description } = req.body;
@@ -53,9 +47,7 @@ exports.updateCategory = async (req, res) => {
   }
 };
 
-// @desc    حذف دسته‌بندی
-// @route   DELETE /api/categories/:id
-// @access  Private/Admin
+//  حذف دسته‌بندی
 exports.deleteCategory = async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
