@@ -34,7 +34,7 @@ const menuItemSchema = new mongoose.Schema({
   },
   prepTime: {
     type: Number,
-    default: 15 // زمان آماده‌سازی به دقیقه (پیش‌فرض ۱۵ دقیقه)
+    default: 15 
   }
 }, { timestamps: true });
 

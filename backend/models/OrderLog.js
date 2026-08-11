@@ -9,7 +9,7 @@ const orderLogSchema = new mongoose.Schema({
   oldStatus: { type: String },
   newStatus: { type: String, required: true },
   changedAt: { type: Date, default: Date.now },
-  changedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' } // کسی که وضعیت را تغییر داده
+  changedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' } 
 });
 
 module.exports = mongoose.model('OrderLog', orderLogSchema);
