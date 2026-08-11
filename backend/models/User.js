@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema({
     enum: ['Customer', 'Kitchen Staff', 'Kitchen', 'Cashier', 'Admin'],
     default: 'Customer'
   },
-  // فیلد جدید جهت تشخیص اولین ورود پرسنل و لزوم تغییر رمز
+  //فیلد برای تشخیص اولین ورود پرسنل و لزوم تغییر رمز
   isPasswordTemp: {
     type: Boolean,
     default: false
@@ -42,7 +42,7 @@ userSchema.pre('save', async function() {
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-// متد مقایسه رمز عبور واردشده با رمز هش‌شده
+// مقایسه رمز عبور واردشده با رمز هش‌شده
 userSchema.methods.matchPassword = async function(enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
