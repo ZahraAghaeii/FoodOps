@@ -10,14 +10,11 @@ const protect = async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   ) {
     try {
-      // گرفتن توکن از Header
       token = req.headers.authorization.split(' ')[1];
 
-      // رمزگشایی توکن (استفاده از fallback برای جلوگیری از خطای نبود env)
       const secret = process.env.JWT_SECRET || 'fallback_secret_key_12345';
       const decoded = jwt.verify(token, secret);
 
-      // پیدا کردن کاربر بدون بازگرداندن پسورد
       req.user = await User.findById(decoded.id).select('-password');
 
       if (!req.user) {
@@ -48,7 +45,6 @@ const authorize = (...roles) => {
   };
 };
 
-// میدلور اختصاصی ادمین برای حل مشکل ورود به بخش‌های مدیریتی
 const admin = (req, res, next) => {
   if (req.user && req.user.role && req.user.role.toLowerCase() === 'admin') {
     next();
