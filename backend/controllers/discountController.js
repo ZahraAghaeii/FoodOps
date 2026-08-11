@@ -1,6 +1,6 @@
 const Discount = require('../models/Discount');
 
-// @desc    تعریف کد تخفیف جدید (مخصوص ادمین)
+//  تعریف کد تخفیف (مخصوص ادمین)
 exports.createDiscount = async (req, res) => {
   try {
     const { code, discountPercent, expiryDate } = req.body;
@@ -22,7 +22,7 @@ exports.createDiscount = async (req, res) => {
   }
 };
 
-// @desc    دریافت لیست کدهای تخفیف (مخصوص ادمین)
+// دریافت لیست کدهای تخفیف (مخصوص ادمین)
 exports.getAllDiscounts = async (req, res) => {
   try {
     const discounts = await Discount.find().sort({ createdAt: -1 });
@@ -32,7 +32,7 @@ exports.getAllDiscounts = async (req, res) => {
   }
 };
 
-// @desc    دریافت کدهای تخفیف فعال برای نمایش به مشتریان
+//دریافت کدهای تخفیف فعال برای نمایش به مشتریان
 exports.getPublicDiscounts = async (req, res) => {
   try {
     const now = new Date();
@@ -47,7 +47,7 @@ exports.getPublicDiscounts = async (req, res) => {
   }
 };
 
-// @desc    بررسی و اعمال کد تخفیف توسط مشتری
+// بررسی و اعمال کد تخفیف توسط مشتری
 exports.applyDiscount = async (req, res) => {
   try {
     const { code, cartTotal } = req.body;
@@ -76,7 +76,7 @@ exports.applyDiscount = async (req, res) => {
   }
 };
 
-// @desc    حذف کد تخفیف (مخصوص ادمین)
+//حذف کد تخفیف (مخصوص ادمین)
 exports.deleteDiscount = async (req, res) => {
   try {
     await Discount.findByIdAndDelete(req.params.id);

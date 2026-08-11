@@ -10,7 +10,7 @@ const generateToken = (id) => {
   );
 };
 
-// تابع کمکی تولید رمز عبور رندوم ۸ کاراکتری
+// تابع تولید رمز عبور رندوم ۸ کاراکتری
 const generateRandomPassword = () => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789#@!';
   let tempPass = '';
@@ -20,8 +20,7 @@ const generateRandomPassword = () => {
   return tempPass;
 };
 
-// @desc    ثبت‌نام کاربر جدید (مشتریان عادی)
-// @route   POST /api/auth/register
+// ثبت‌نام کاربر جدید 
 exports.register = async (req, res) => {
   try {
     const { name, email, password, phone } = req.body;
@@ -61,8 +60,7 @@ exports.register = async (req, res) => {
   }
 };
 
-// @desc    ورود کاربر
-// @route   POST /api/auth/login
+//  ورود کاربر
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -95,8 +93,7 @@ exports.login = async (req, res) => {
   }
 };
 
-// @desc    دریافت اطلاعات کاربر فعلی
-// @route   GET /api/auth/me
+// دریافت اطلاعات کاربر فعلی
 exports.getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select('-password');
@@ -110,8 +107,7 @@ exports.getMe = async (req, res) => {
   }
 };
 
-// @desc    ویرایش اطلاعات پروفایل شخص
-// @route   PUT /api/auth/profile
+// ویرایش اطلاعات پروفایل شخص
 exports.updateProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
@@ -145,8 +141,7 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
-// @desc    تغییر رمز موقت به رمز دائمی
-// @route   POST /api/auth/change-password
+//  تغییر رمز موقت به رمز دائمی
 exports.changePassword = async (req, res) => {
   try {
     const { newPassword } = req.body;
@@ -171,8 +166,7 @@ exports.changePassword = async (req, res) => {
   }
 };
 
-// @desc    دریافت لیست تمامی کاربران (مخصوص ادمین)
-// @route   GET /api/auth/users
+//  دریافت لیست تمامی کاربران (مخصوص ادمین)
 exports.getAllUsers = async (req, res) => {
   try {
     const users = await User.find().select('-password').sort({ createdAt: -1 });
@@ -183,8 +177,7 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
-// @desc    تغییر نقش کاربر توسط ادمین
-// @route   PATCH /api/auth/users/:id/role
+//  تغییر نقش کاربر توسط ادمین
 exports.updateUserRole = async (req, res) => {
   try {
     const { role } = req.body;
@@ -209,8 +202,7 @@ exports.updateUserRole = async (req, res) => {
   }
 };
 
-// @desc    ثبت‌نام پرسنل جدید توسط ادمین با رمز رندوم
-// @route   POST /api/auth/staff
+// ثبت‌نام پرسنل جدید توسط ادمین با رمز رندوم
 exports.createStaff = async (req, res) => {
   try {
     const { name, email, phone, role } = req.body;
@@ -254,8 +246,7 @@ exports.createStaff = async (req, res) => {
   }
 };
 
-// @desc    حذف کاربر توسط ادمین
-// @route   DELETE /api/auth/users/:id
+// حذف کاربر توسط ادمین
 exports.deleteUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -278,8 +269,7 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
-// @desc    خروج کاربر
-// @route   POST /api/auth/logout
+//  خروج کاربر
 exports.logout = async (req, res) => {
   res.json({ message: 'خروج با موفقیت انجام شد' });
 };
